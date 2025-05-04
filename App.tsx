@@ -1,11 +1,4 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- */
-
-import React from 'react';
+import React, { useEffect, useState} from 'react';
 import type {PropsWithChildren} from 'react';
 import {
   ScrollView,
@@ -14,6 +7,9 @@ import {
   Text,
   useColorScheme,
   View,
+  PermissionsAndroid,
+  Platform,
+  Button,
 } from 'react-native';
 
 import {
@@ -24,108 +20,102 @@ import {
   ReloadInstructions,
 } from 'react-native/Libraries/NewAppScreen';
 
+import { BleManager, Characteristic, Service, Device} from 'react-native-ble-plx';
+
+const manager = new BleManager();
+
+const SERVICE_UUID = "4fafc201-1fb5-459e-8fcc-c5c9c331914b";
+const REP_COUNT_CHAR_UUID = "beb5483e-36e1-4688-b7f5-ea07361b26a8";
+const VELOCITY_CHAR_UUID = "";
+
+
+
 type SectionProps = PropsWithChildren<{
   title: string;
 }>;
 
-function Section({children, title}: SectionProps): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
-  return (
-    <View style={styles.sectionContainer}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: isDarkMode ? Colors.white : Colors.black,
-          },
-        ]}>
-        {title}
-      </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
-        {children}
-      </Text>
-    </View>
-  );
-}
+
 
 function App(): React.JSX.Element {
+
+  const [device, setDevice] = useState<Device | null>(null);
+  const [repCount, setRepCount] = useState(0);
+  const [velocity, setVelocity] = useState(0);
+
+  useEffect(() => {
+    if (Platform.OS === "android"){
+      console.log("Android detected");
+      PermissionsAndroid.requestMultiple([
+        PermissionsAndroid.PERMISSIONS.BLUETOOTH_SCAN,
+        PermissionsAndroid.PERMISSIONS.BLUETOOTH_CONNECT,
+        PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+      ])
+    }
+  }, [])
+  
+  const startScan = () => {
+    console.log("Scan Started");
+    manager.startDeviceScan(null, null, (error, scannedDevice) => {
+      console.log(scannedDevice?.name);
+      if (error) {
+        console.warn(error);
+        return
+      }
+
+      if (scannedDevice?.name === "RepCounter"){
+        console.log("scanned")
+        manager.stopDeviceScan();
+        connectDevice(scannedDevice);
+      }
+    })
+  }
+
+  const connectDevice = async (device: Device) => {
+    console.log("Attemping to connected device");
+    const connectedDevice = await device.connect();
+    await connectedDevice.discoverAllServicesAndCharacteristics();
+    setDevice(connectedDevice);
+    subscribeToData(connectedDevice);
+  }
+
+  const subscribeToData = (device: Device) => {
+    console.log("Getting Data");
+    device.monitorCharacteristicForService(SERVICE_UUID, REP_COUNT_CHAR_UUID, (error, characteristic) => {
+      if (error){
+        console.warn(error);
+        return;
+      }
+      if (!characteristic) return;
+      if (!characteristic.value) return;
+
+      const value = parseInt(characteristic.value, 16);
+      setRepCount(value);
+    })
+  }
+
   const isDarkMode = useColorScheme() === 'dark';
 
   const backgroundStyle = {
     backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
   };
 
-  /*
-   * To keep the template simple and small we're adding padding to prevent view
-   * from rendering under the System UI.
-   * For bigger apps the reccomendation is to use `react-native-safe-area-context`:
-   * https://github.com/AppAndFlow/react-native-safe-area-context
-   *
-   * You can read more about it here:
-   * https://github.com/react-native-community/discussions-and-proposals/discussions/827
-   */
   const safePadding = '5%';
 
   return (
-    <View style={backgroundStyle}>
-      <StatusBar
-        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-        backgroundColor={backgroundStyle.backgroundColor}
-      />
+    <View style={[backgroundStyle, {flex: 1, padding: 20}]}>
+      <Button title="Start scan" onPress={startScan}></Button>
+
+      <Text>Connected Device: {device?.name || "None"}</Text>
       <ScrollView
         style={backgroundStyle}>
         <View style={{paddingRight: safePadding}}>
           <Header/>
         </View>
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-            paddingHorizontal: safePadding,
-            paddingBottom: safePadding,
-          }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.tsx</Text> to change this
-            screen and then come back to see your edits.
-          </Section>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
-        </View>
+        <Text>Rep Count: {repCount} </Text>
+        <Text>Velocity: </Text>
       </ScrollView>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
-  },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-  },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
-  },
-  highlight: {
-    fontWeight: '700',
-  },
-});
 
 export default App;
