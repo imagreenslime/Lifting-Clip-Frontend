@@ -1,5 +1,6 @@
 import React, { useEffect, useState} from 'react';
 import type {PropsWithChildren} from 'react';
+import {decode as atob} from 'base-64';
 import {
   ScrollView,
   StatusBar,
@@ -10,14 +11,12 @@ import {
   PermissionsAndroid,
   Platform,
   Button,
+  TouchableOpacity,
 } from 'react-native';
 
 import {
   Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
+
 } from 'react-native/Libraries/NewAppScreen';
 
 import { BleManager, Characteristic, Service, Device} from 'react-native-ble-plx';
@@ -39,8 +38,17 @@ type SectionProps = PropsWithChildren<{
 function App(): React.JSX.Element {
 
   const [device, setDevice] = useState<Device | null>(null);
+  const [foundDevices, setFoundDevices] = useState<Device[]>([]);
   const [repCount, setRepCount] = useState(0);
-  const [velocity, setVelocity] = useState(0);
+
+  const highlightButton = () => {
+    const [buttonPressed, setButtonPressed] = useState(false);
+    <TouchableOpacity
+    onPressOut ={() => setButtonPressed(true)}
+    onPress = {() => setButtonPressed(false)}
+    >
+    </TouchableOpacity>
+  }
 
   useEffect(() => {
     if (Platform.OS === "android"){
@@ -61,61 +69,88 @@ function App(): React.JSX.Element {
         console.warn(error);
         return
       }
-
-      if (scannedDevice?.name === "RepCounter"){
-        console.log("scanned")
-        manager.stopDeviceScan();
-        connectDevice(scannedDevice);
+      if (!scannedDevice?.name || scannedDevice.id){
+        return
       }
+      setFoundDevices((previousDevices: Device[]) => {
+        const exists = previousDevices.find((d) => d.id === scannedDevice.id);
+        if (exists){
+          return previousDevices;
+        }
+        return [...previousDevices, scannedDevice];
+      })
+  
+
+
     })
   }
 
   const connectDevice = async (device: Device) => {
-    console.log("Attemping to connected device");
-    const connectedDevice = await device.connect();
-    await connectedDevice.discoverAllServicesAndCharacteristics();
-    setDevice(connectedDevice);
-    subscribeToData(connectedDevice);
+    manager.stopDeviceScan();
+    try {
+      console.log("Attemping to connect device" + device.name);
+      const connectedDevice = await device.connect();
+      await connectedDevice.discoverAllServicesAndCharacteristics();
+      setDevice(connectedDevice);
+      
+      manager.stopDeviceScan();
+
+      subscribeToData(connectedDevice);
+
+    } 
+    catch (error) {
+      console.log("Connection failed", error);
+      setDevice(null);
+    }
+
   }
 
   const subscribeToData = (device: Device) => {
-    console.log("Getting Data");
     device.monitorCharacteristicForService(SERVICE_UUID, REP_COUNT_CHAR_UUID, (error, characteristic) => {
       if (error){
-        console.warn(error);
+        console.warn("Unhandled error", error);
+        if (error.errorCode === 201){
+          console.warn("Connection Error");
+          connectDevice(device);
+        }
+        else {
+          setDevice(null);
+        }
         return;
       }
       if (!characteristic) return;
       if (!characteristic.value) return;
 
-      const value = parseInt(characteristic.value, 16);
+      const value = parseInt(atob(characteristic.value), 16);
       setRepCount(value);
     })
   }
 
-  const isDarkMode = useColorScheme() === 'dark';
-
   const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
+    backgroundColor: Colors.lighter,
   };
-
-  const safePadding = '5%';
 
   return (
     <View style={[backgroundStyle, {flex: 1, padding: 20}]}>
-      <Button title="Start scan" onPress={startScan}></Button>
-
-      <Text>Connected Device: {device?.name || "None"}</Text>
-      <ScrollView
-        style={backgroundStyle}>
-        <View style={{paddingRight: safePadding}}>
-          <Header/>
-        </View>
+      <View>
+        <Text>This is the Header</Text>
+      </View>
+      <View>
+        <Button title="Scan for Devices" onPress={startScan}></Button>
+        <Text>Scanned Devices</Text>
+        <ScrollView>
+        {foundDevices.map((device) => (
+          <Button title={device.name ?? "Unknown"} onPress={() => connectDevice(device)}></Button>
+          
+        ))}
+        </ScrollView>
+        <Text>Connected Device: {device?.name || "None"}</Text>
         <Text>Rep Count: {repCount} </Text>
         <Text>Velocity: </Text>
-      </ScrollView>
+      </View>
     </View>
   );
 }
+
 
 export default App;
