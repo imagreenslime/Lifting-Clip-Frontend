@@ -1,18 +1,24 @@
-// src/components/SetDetails.js
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 
-export default function SetDetails({ set }) {
+export default function SeeDetails({ set, onPress }) {
   return (
-    <View style={styles.setCard}>
+    <TouchableOpacity onPress={onPress} style={styles.setCard}>
       <Text style={styles.exercise}>{set.exercise}</Text>
-      <Text style={styles.info}>Reps: {set.reps} | Tempo: {set.tempo} | Duration: {set.duration}</Text>
-    </View>
+      <Text style={styles.info}>
+        Reps: {set.reps} | Tempo: {set.tempo} | Duration: {set.duration}
+      </Text>
+    </TouchableOpacity>
   );
 }
 
 const styles = StyleSheet.create({
-  setCard: { backgroundColor: '#ddd', padding: 12, borderRadius: 6, marginBottom: 10 },
+  setCard: {
+    backgroundColor: '#ddd',
+    padding: 12,
+    borderRadius: 6,
+    marginBottom: 10,
+  },
   exercise: { fontWeight: 'bold' },
   info: { marginTop: 4 },
 });

@@ -1,12 +1,17 @@
+// App.tsx
 import React, { useEffect, useState } from 'react';
 import { View, Button, Text, ScrollView, StyleSheet} from 'react-native';
-import BluetoothScreen from './src/screens/BluetoothScreen';
+
+import Navigation from './src/navigation/navigation';
+import SafeAreaWrapper from './src/components/SafeAreaWrapper';
 
 
 const App = () => {
   return (
-    <View style={styles.container}> 
-      <BluetoothScreen />
+    <View style={styles.container}>
+      <SafeAreaWrapper>
+        <Navigation />
+      </SafeAreaWrapper>
     </View>
   );
 };
