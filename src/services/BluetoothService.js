@@ -53,6 +53,7 @@ class BluetoothService{
     subscribeToSetData(device){
         device.monitorCharacteristicForService(SERVICE_UUID, SET_CHARACTERISTIC_UUID, (error, characteristic) => {
           if (error || !characteristic?.value) return;
+          console.log("Set data called.");
           try {
             const jsonString = atob(characteristic.value);
             const dataArray  = JSON.parse(jsonString);
@@ -105,7 +106,9 @@ class BluetoothService{
             this.device.cancelConnection();
             this.device = null;
         }
-        this.manager.destroy();
+        this.commandChar = null;
+        this.setSummaries = null;
+        this.repCount = null;
     }
 }
 export default new BluetoothService();

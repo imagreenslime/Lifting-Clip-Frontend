@@ -36,6 +36,19 @@ export default function App() {
   const [selectedSet, setSelectedSet] = useState(null);
   const [connectedDevice, setConnectedDevice] = useState(null);
 
+  const addSetToSession = (sessionId, newSet) => {
+    setSessions(prevSessions => {
+      const updated = prevSessions.map(s =>
+        s.id === sessionId
+          ? { ...s, sets: [...s.sets, newSet] }
+          : s
+      );
+      const updatedSession = updated.find(s => s.id === sessionId);
+      setSelectedSession(updatedSession);
+      return updated;
+    });
+  };
+
   const updateSessions = (newSessions) => setSessions([...newSessions]);
 
   const deleteSession = (id) => {
@@ -78,6 +91,19 @@ export default function App() {
       });
   };
 
+  const addSession = () => {
+    const newSession = {
+      id: Date.now().toString(),
+      name: 'New Session',
+      date: new Date().toISOString().split('T')[0],
+      sets: [],
+    };
+    const updatedSessions = [newSession, ...sessions];
+    setSessions(updatedSessions);
+    setSelectedSession(newSession);
+    setView('SessionDetail');
+  };
+
   const goToSession = (session) => {
     setSelectedSession(session);
     setView('SessionDetail');
@@ -106,17 +132,18 @@ export default function App() {
         );
           
     }
-    if (tab === "Recording"){
-        return (
-            <BluetoothRecordingScreen
-              device={connectedDevice}
-              onDisconnect={() => setConnectedDevice(null)}
-            />
-          ); 
-    }
 
-    if (view === 'Home') return <HomeScreen sessions={sessions} onSessionPress={goToSession} onDeleteSession={deleteSession} onRenameSession={renameSession}/>;
-    if (view === 'SessionDetail') return <SessionDetailScreen session={selectedSession} onSetPress={goToSet} onBack={goBack} onDeleteSet={(setId) => deleteSet(selectedSession.id, setId)} onRenameSet={(setId, name) => renameSet(selectedSession.id, setId, name)}/>;
+    if (view === 'Home') return <HomeScreen sessions={sessions} onSessionPress={goToSession} 
+    onDeleteSession={deleteSession} onRenameSession={renameSession} 
+    onAddSession={addSession}/>;
+
+    if (view === 'SessionDetail') return <SessionDetailScreen 
+        session={selectedSession} onSetPress={goToSet} 
+        onBack={goBack} onDeleteSet={(setId) => deleteSet(selectedSession.id, setId)} 
+        onRenameSet={(setId, name) => renameSet(selectedSession.id, setId, name)} 
+        connectedDevice={connectedDevice} onAddSet={(newSet) => addSetToSession(selectedSession.id, newSet)}
+
+    />;
     if (view === 'SetDetail') return <SetDetailScreen set={selectedSet} onBack={goBack} />;
   };
 
@@ -130,9 +157,7 @@ export default function App() {
         <TouchableOpacity onPress={() => { setTab('Bluetooth'); setView('Bluetooth'); }} style={styles.tab}>
           <Text style={styles.tabText}>Bluetooth</Text>
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => { setTab('Recording'); setView('Recording'); }} style={styles.tab}>
-          <Text style={styles.tabText}>Recording</Text>
-        </TouchableOpacity>
+
       </View>
     </View>
   );

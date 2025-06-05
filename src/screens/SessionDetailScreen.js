@@ -1,26 +1,24 @@
-import React from 'react';
-import {
-  View,
-  Text,
-  FlatList,
-  StyleSheet,
-  TouchableOpacity,
-  Alert,
-} from 'react-native';
+import React, { useEffect,useState} from 'react';
+import { View, Text, FlatList, StyleSheet, TouchableOpacity, Alert } from 'react-native';
+import BluetoothRecordingScreen from './BluetoothRecordingScreen';
+export default function SessionDetailScreen({ session, onSetPress, onDeleteSet, onRenameSet, onBack, connectedDevice, onAddSet}) {
 
-export default function SessionDetailScreen({
-  session,
-  onSetPress,
-  onDeleteSet,
-  onRenameSet,
-  onBack,
-}) {
+  const [sets, setSets] = useState(session.sets || []);
+
   const promptRename = (setId) => {
     Alert.prompt('Rename Set', 'Enter new exercise name:', (text) => {
       if (text.trim()) onRenameSet(setId, text);
     });
   };
 
+  useEffect(() => {
+    setSets(session.sets || []);
+  }, [session]);
+
+  const handleNewSet = (newSet) => {
+    if (onAddSet) onAddSet(newSet);
+  };
+  
   return (
     <View style={styles.container}>
       <TouchableOpacity onPress={onBack}>
@@ -38,6 +36,7 @@ export default function SessionDetailScreen({
                 Reps: {item.reps} | Tempo: {item.tempo} | Duration: {item.duration}
               </Text>
             </TouchableOpacity>
+
             <TouchableOpacity onPress={() => promptRename(item.id)}>
               <Text style={styles.btn}>✏️</Text>
             </TouchableOpacity>
@@ -46,6 +45,12 @@ export default function SessionDetailScreen({
             </TouchableOpacity>
           </View>
         )}
+      />
+
+      <BluetoothRecordingScreen
+        device={connectedDevice}
+        onDisconnect={() => {}}
+        onNewSet={handleNewSet}
       />
     </View>
   );

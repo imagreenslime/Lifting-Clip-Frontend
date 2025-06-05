@@ -1,5 +1,6 @@
+// src/screens/SetDetailScreen.js
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, FlatList } from 'react-native';
 
 export default function SetDetailScreen({ set, onBack }) {
   return (
@@ -8,9 +9,23 @@ export default function SetDetailScreen({ set, onBack }) {
         <Text style={styles.back}>← Back</Text>
       </TouchableOpacity>
       <Text style={styles.title}>{set.exercise}</Text>
-      <Text>Reps: {set.reps}</Text>
-      <Text>Tempo: {set.tempo}</Text>
-      <Text>Duration: {set.duration}</Text>
+      <Text style={styles.summary}>
+        Total Reps: {set.reps}
+      </Text>
+
+      <FlatList
+        data={set.repData}
+        keyExtractor={(item) => item.id}
+        renderItem={({ item, index }) => (
+          <View style={styles.repCard}>
+            <Text style={styles.repHeader}>Rep {index + 1}</Text>
+            <Text>Duration: {item.duration}</Text>
+            <Text>ROM: {item.rom}</Text>
+            <Text>Tempo: {item.tempo}</Text>
+          </View>
+        )}
+        ListEmptyComponent={<Text>No rep data available.</Text>}
+      />
     </View>
   );
 }
@@ -19,4 +34,12 @@ const styles = StyleSheet.create({
   container: { flex: 1, padding: 16 },
   title: { fontSize: 22, fontWeight: 'bold', marginBottom: 8 },
   back: { color: '#007AFF', marginBottom: 10 },
+  summary: { marginBottom: 16 },
+  repCard: {
+    backgroundColor: '#f0f0f0',
+    padding: 12,
+    borderRadius: 6,
+    marginBottom: 10,
+  },
+  repHeader: { fontWeight: 'bold', marginBottom: 4 },
 });

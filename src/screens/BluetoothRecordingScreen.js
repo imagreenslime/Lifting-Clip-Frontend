@@ -1,24 +1,112 @@
-// src/screens/BluetoothRecordingScreen.js
 import React, { useEffect, useState } from 'react';
-import { View, Text, Button, TouchableOpacity} from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
 import BluetoothService from '../services/BluetoothService';
 
-export default function BluetoothRecordingScreen({ device, onDisconnect }) {
-  const [repCount, setRepCount] = useState(0);
-  const [setSummaries, setSetSummaries] = useState([]);
+export default function BluetoothRecordingScreen({ device, onDisconnect, onNewSet }) {
 
-  useEffect(() => {
-    BluetoothService.onSetUpdate(setSetSummaries);
-    BluetoothService.onRepUpdate(setRepCount);
-  }, []);
+  const [processedReps, setProcessedReps] = useState(new Set());
+
+  BluetoothService.onSetUpdate((summaries) => {
+    const latestSetId = summaries[summaries.length - 1].set;
+  
+    const repsInSet = summaries.filter(s => 
+      s.set === latestSetId && !processedReps.has(s.id)
+    );
+  
+    if (repsInSet.length === 0) return;
+  
+    const convertedSet = {
+      id: Date.now().toString(),
+      exercise: '(Enter Exercise)',
+      reps: repsInSet.length,
+      duration: `${repsInSet.reduce((sum, r) => sum + r.dur, 0).toFixed(2)}s`,
+      tempo: '',
+      repData: repsInSet.map(rep => ({
+        id: rep.id.toString(),
+        duration: `${rep.dur.toFixed(2)}s`,
+        rom: `${rep.rom.toFixed(2)}`,
+        tempo: rep.tempo.join('-'),
+      })),
+    };
+  
+    if (onNewSet) onNewSet(convertedSet);
+  
+    // ✅ Mark these reps as processed
+    setProcessedReps(prev => {
+      const updated = new Set(prev);
+      repsInSet.forEach(r => updated.add(r.id));
+      return updated;
+    });
+  });
 
   return (
-    <View style={{ padding: 20 }}>
-      <Text>Connected to: {device?.name || "N/A"}</Text>
-      <Text>Reps: {repCount}</Text>
-      <Button title="Start Recording" onPress={() => BluetoothService.sendCommand('START_RECORDING')} />
-      <Button title="Stop Recording" onPress={() => BluetoothService.sendCommand('STOP_RECORDING')} />
-      <Button title="Disconnect" onPress={onDisconnect} />
+    <View style={styles.container}>
+      <Text style={styles.sectionTitle}>📊 Set Recording</Text>
+      <Text style={styles.label}>Connected Device: <Text style={styles.device}>{device?.name || 'None'}</Text></Text>
+      <Text style={styles.label}>Current Rep Count: <Text style={styles.count}>{BluetoothService.repCount()}</Text></Text>
+
+      <View style={styles.buttonGroup}>
+        <TouchableOpacity style={styles.actionButton} onPress={() => BluetoothService.sendCommand('START_RECORDING')}>
+          <Text style={styles.buttonText}>Start</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={[styles.actionButton, styles.stopButton]} onPress={() => BluetoothService.sendCommand('STOP_RECORDING')}>
+          <Text style={styles.buttonText}>Stop</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={[styles.actionButton, styles.disconnectButton]} onPress={onDisconnect}>
+          <Text style={styles.buttonText}>Disconnect</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    marginTop: 16,
+    padding: 16,
+    backgroundColor: '#f4f6f8',
+    borderRadius: 10,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    marginBottom: 12,
+    textAlign: 'center',
+  },
+  label: {
+    fontSize: 15,
+    marginBottom: 4,
+  },
+  device: {
+    fontWeight: '500',
+    color: '#4A90E2',
+  },
+  count: {
+    fontWeight: 'bold',
+    color: '#333',
+  },
+  buttonGroup: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 12,
+  },
+  actionButton: {
+    flex: 1,
+    backgroundColor: '#4CAF50',
+    padding: 10,
+    marginHorizontal: 5,
+    borderRadius: 6,
+    alignItems: 'center',
+  },
+  stopButton: {
+    backgroundColor: '#FFA500',
+  },
+  disconnectButton: {
+    backgroundColor: '#D9534F',
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 15,
+    fontWeight: '500',
+  },
+});
