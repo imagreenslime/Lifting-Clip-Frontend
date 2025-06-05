@@ -1,32 +1,70 @@
 import React from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
-import SeeDetails from '../components/SeeDetails';
+import {
+  View,
+  Text,
+  FlatList,
+  StyleSheet,
+  TouchableOpacity,
+  Alert,
+} from 'react-native';
 
-const dummySets = [
-  { id: '1', exercise: 'Bench Press', reps: 10, tempo: '2-1-2', duration: '30s' },
-  { id: '2', exercise: 'Incline Press', reps: 8, tempo: '2-1-1', duration: '28s' },
-];
+export default function SessionDetailScreen({
+  session,
+  onSetPress,
+  onDeleteSet,
+  onRenameSet,
+  onBack,
+}) {
+  const promptRename = (setId) => {
+    Alert.prompt('Rename Set', 'Enter new exercise name:', (text) => {
+      if (text.trim()) onRenameSet(setId, text);
+    });
+  };
 
-export default function SessionDetailScreen({ session, onSetPress, onBack }) {
   return (
-    <View>
+    <View style={styles.container}>
       <TouchableOpacity onPress={onBack}>
-        <Text>← Back</Text>
+        <Text style={styles.back}>← Back</Text>
       </TouchableOpacity>
+      <Text style={styles.header}>{session.name}</Text>
       <FlatList
         data={session.sets}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
-          <SeeDetails set={item} onPress={() => onSetPress(item)} />
-
+          <View style={styles.setCard}>
+            <TouchableOpacity onPress={() => onSetPress(item)} style={{ flex: 1 }}>
+              <Text style={styles.exercise}>{item.exercise}</Text>
+              <Text style={styles.info}>
+                Reps: {item.reps} | Tempo: {item.tempo} | Duration: {item.duration}
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => promptRename(item.id)}>
+              <Text style={styles.btn}>✏️</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => onDeleteSet(item.id)}>
+              <Text style={styles.btn}>🗑</Text>
+            </TouchableOpacity>
+          </View>
         )}
       />
     </View>
   );
 }
 
-
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 16 },
   header: { fontSize: 24, fontWeight: 'bold', marginBottom: 16 },
+  back: { color: '#007AFF', marginBottom: 10 },
+  setCard: {
+    backgroundColor: '#ddd',
+    padding: 12,
+    borderRadius: 6,
+    marginBottom: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  exercise: { fontWeight: 'bold' },
+  info: { marginTop: 4 },
+  btn: { fontSize: 16 },
 });
