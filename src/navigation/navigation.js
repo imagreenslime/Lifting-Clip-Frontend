@@ -1,5 +1,5 @@
 // src/navigation/navigation.js
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 
 import HomeScreen from '../screens/HomeScreen';
@@ -7,6 +7,12 @@ import SessionDetailScreen from '../screens/SessionDetailScreen';
 import SetDetailScreen from '../screens/SetDetailsScreen';
 import BluetoothConnectScreen from '../screens/BluetoothConnectScreen';
 import BluetoothRecordingScreen from '../screens/BluetoothRecordingScreen';
+
+// TODO LIST
+// 1) Firebase authentification
+// 2) Add database and etc.
+// 3) UseContext() to remove prop drilling
+
 
 export default function App() {
   const [sessions, setSessions] = useState([
@@ -29,6 +35,11 @@ export default function App() {
       ]
     },
   ])
+
+  useEffect(() => {
+    console.log(sessions);
+  }, [sessions])
+
 
   const [tab, setTab] = useState('Home'); // Home or Bluetooth
   const [view, setView] = useState('Home'); // Home, SessionDetail, SetDetail

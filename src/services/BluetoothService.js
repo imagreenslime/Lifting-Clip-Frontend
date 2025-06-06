@@ -17,6 +17,9 @@ class BluetoothService{
         this.repUpdateCallback = null;
         this.deviceDiscoveredCallback = null;
     }
+    getRepCount(){
+      return this.repCount;
+    }
     startScan(){
         this.manager.startDeviceScan(null, null, (error, scannedDevice) => {
             if (error || !scannedDevice?.name) return;

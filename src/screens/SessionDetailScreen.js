@@ -1,6 +1,8 @@
 import React, { useEffect,useState} from 'react';
 import { View, Text, FlatList, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import BluetoothRecordingScreen from './BluetoothRecordingScreen';
+import SetCard from '../components/SetCard';
+
 export default function SessionDetailScreen({ session, onSetPress, onDeleteSet, onRenameSet, onBack, connectedDevice, onAddSet}) {
 
   const [sets, setSets] = useState(session.sets || []);
@@ -18,7 +20,7 @@ export default function SessionDetailScreen({ session, onSetPress, onDeleteSet, 
   const handleNewSet = (newSet) => {
     if (onAddSet) onAddSet(newSet);
   };
-  
+
   return (
     <View style={styles.container}>
       <TouchableOpacity onPress={onBack}>
@@ -29,24 +31,9 @@ export default function SessionDetailScreen({ session, onSetPress, onDeleteSet, 
         data={session.sets}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
-          <View style={styles.setCard}>
-            <TouchableOpacity onPress={() => onSetPress(item)} style={{ flex: 1 }}>
-              <Text style={styles.exercise}>{item.exercise}</Text>
-              <Text style={styles.info}>
-                Reps: {item.reps} | Tempo: {item.tempo} | Duration: {item.duration}
-              </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity onPress={() => promptRename(item.id)}>
-              <Text style={styles.btn}>✏️</Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => onDeleteSet(item.id)}>
-              <Text style={styles.btn}>🗑</Text>
-            </TouchableOpacity>
-          </View>
+          <SetCard item={item} onSetPress={onSetPress} promptRename={promptRename} onDeleteSet={onDeleteSet}/>
         )}
       />
-
       <BluetoothRecordingScreen
         device={connectedDevice}
         onDisconnect={() => {}}

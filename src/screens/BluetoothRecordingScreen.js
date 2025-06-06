@@ -20,7 +20,6 @@ export default function BluetoothRecordingScreen({ device, onDisconnect, onNewSe
       exercise: '(Enter Exercise)',
       reps: repsInSet.length,
       duration: `${repsInSet.reduce((sum, r) => sum + r.dur, 0).toFixed(2)}s`,
-      tempo: '',
       repData: repsInSet.map(rep => ({
         id: rep.id.toString(),
         duration: `${rep.dur.toFixed(2)}s`,
@@ -31,7 +30,6 @@ export default function BluetoothRecordingScreen({ device, onDisconnect, onNewSe
   
     if (onNewSet) onNewSet(convertedSet);
   
-    // ✅ Mark these reps as processed
     setProcessedReps(prev => {
       const updated = new Set(prev);
       repsInSet.forEach(r => updated.add(r.id));
@@ -43,7 +41,7 @@ export default function BluetoothRecordingScreen({ device, onDisconnect, onNewSe
     <View style={styles.container}>
       <Text style={styles.sectionTitle}>📊 Set Recording</Text>
       <Text style={styles.label}>Connected Device: <Text style={styles.device}>{device?.name || 'None'}</Text></Text>
-      <Text style={styles.label}>Current Rep Count: <Text style={styles.count}>{BluetoothService.repCount()}</Text></Text>
+      <Text style={styles.label}>Current Rep Count: <Text style={styles.count}>{BluetoothService.getRepCount()}</Text></Text>
 
       <View style={styles.buttonGroup}>
         <TouchableOpacity style={styles.actionButton} onPress={() => BluetoothService.sendCommand('START_RECORDING')}>
