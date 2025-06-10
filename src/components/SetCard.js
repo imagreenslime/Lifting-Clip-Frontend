@@ -1,11 +1,58 @@
 // src/components/SetCard.js
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
+import { useApp } from '../providers/NavigationContext';
+export default function SetCard({ item }) {
+  const {
+    setSelectedSet, setView, setSelectedSession, setSessions, selectedSession
+  } = useApp()
 
-export default function SetCard({ item, onSetPress, promptRename, onDeleteSet}) {
+  const goToSet = (set) => {
+    setSelectedSet(set);
+    setView('SetDetail');
+  };
+
+  const deleteSet = (sessionId, setId) => {
+    setSessions(prevSessions => {
+      const updated = prevSessions.map(s =>
+        s.id === sessionId
+          ? { ...s, sets: s.sets.filter(set => set.id !== setId) }
+          : s
+      );
+      const updatedSession = updated.find(s => s.id === sessionId);
+      setSelectedSession(updatedSession);
+      return updated;
+      })
+    };
+  
+    const renameSet = (sessionId, setId, newName) => {
+      setSessions(prevSessions => {
+          const updated = prevSessions.map(s =>
+            s.id === sessionId
+              ? {
+                  ...s,
+                  sets: s.sets.map(set =>
+                    set.id === setId ? { ...set, exercise: newName } : set
+                  ),
+                }
+              : s
+          );
+          const updatedSession = updated.find(s => s.id === sessionId);
+          setSelectedSession(updatedSession);
+          return updated;
+        });
+    };
+
+    const promptRename = (setId) => {
+      Alert.prompt('Rename Set', 'Enter new exercise name:', (text) => {
+        if (text.trim()) renameSet(selectedSession.id, setId, text);
+      });
+    };
+
+
   return (
 <View style={styles.setCard}>
-            <TouchableOpacity onPress={() => onSetPress(item)} style={{ flex: 1 }}>
+            <TouchableOpacity onPress={() => goToSet(item)} style={{ flex: 1 }}>
               <Text style={styles.exercise}>{item.exercise}</Text>
               <Text style={styles.info}>
                 Reps: {item.reps} | Duration: {item.duration}
@@ -15,7 +62,7 @@ export default function SetCard({ item, onSetPress, promptRename, onDeleteSet}) 
             <TouchableOpacity onPress={() => promptRename(item.id)}>
               <Text style={styles.btn}>✏️</Text>
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => onDeleteSet(item.id)}>
+            <TouchableOpacity onPress={() => deleteSet(selectedSession.id, item.id)}>
               <Text style={styles.btn}>🗑</Text>
             </TouchableOpacity>
           </View>

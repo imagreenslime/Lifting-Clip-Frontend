@@ -1,10 +1,30 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
+// src/screens/BluetoothRecordScreen.js
+import React, { useState } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import BluetoothService from '../services/BluetoothService';
-
-export default function BluetoothRecordingScreen({ device, onDisconnect, onNewSet }) {
+import { useApp } from '../providers/NavigationContext';
+export default function BluetoothRecordingScreen({ }) {
+  const {
+    connectedDevice, selectedSession, setSessions, setSelectedSession
+  } = useApp();
 
   const [processedReps, setProcessedReps] = useState(new Set());
+  const onDisconnect = () => {
+    
+  };
+
+  const addSetToSession = (sessionId, newSet) => {
+    setSessions(prevSessions => {
+      const updated = prevSessions.map(s =>
+        s.id === sessionId
+          ? { ...s, sets: [...s.sets, newSet] }
+          : s
+      );
+      const updatedSession = updated.find(s => s.id === sessionId);
+      setSelectedSession(updatedSession);
+      return updated;
+    });
+  };
 
   BluetoothService.onSetUpdate((summaries) => {
     const latestSetId = summaries[summaries.length - 1].set;
@@ -28,7 +48,7 @@ export default function BluetoothRecordingScreen({ device, onDisconnect, onNewSe
       })),
     };
   
-    if (onNewSet) onNewSet(convertedSet);
+    addSetToSession(selectedSession.id, convertedSet);
   
     setProcessedReps(prev => {
       const updated = new Set(prev);
@@ -40,7 +60,7 @@ export default function BluetoothRecordingScreen({ device, onDisconnect, onNewSe
   return (
     <View style={styles.container}>
       <Text style={styles.sectionTitle}>📊 Set Recording</Text>
-      <Text style={styles.label}>Connected Device: <Text style={styles.device}>{device?.name || 'None'}</Text></Text>
+      <Text style={styles.label}>Connected Device: <Text style={styles.device}>{connectedDevice?.name || 'None'}</Text></Text>
       <Text style={styles.label}>Current Rep Count: <Text style={styles.count}>{BluetoothService.getRepCount()}</Text></Text>
 
       <View style={styles.buttonGroup}>

@@ -1,44 +1,37 @@
+// src/screens/SessionDetailScreen.js
 import React, { useEffect,useState} from 'react';
 import { View, Text, FlatList, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import BluetoothRecordingScreen from './BluetoothRecordingScreen';
 import SetCard from '../components/SetCard';
+import { useApp } from '../providers/NavigationContext';
+export default function SessionDetailScreen({ onAddSet}) {
 
-export default function SessionDetailScreen({ session, onSetPress, onDeleteSet, onRenameSet, onBack, connectedDevice, onAddSet}) {
-
-  const [sets, setSets] = useState(session.sets || []);
-
-  const promptRename = (setId) => {
-    Alert.prompt('Rename Set', 'Enter new exercise name:', (text) => {
-      if (text.trim()) onRenameSet(setId, text);
-    });
-  };
-
-  useEffect(() => {
-    setSets(session.sets || []);
-  }, [session]);
-
-  const handleNewSet = (newSet) => {
-    if (onAddSet) onAddSet(newSet);
+  const {
+    setSessions, 
+    selectedSession, setSelectedSession,
+    setView, view, 
+    connectedDevice
+  } = useApp()
+  
+  const goBack = () => {
+    if (view === 'SetDetail') setView('SessionDetail');
+    else if (view === 'SessionDetail') setView('Home');
   };
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity onPress={onBack}>
+      <TouchableOpacity onPress={goBack}>
         <Text style={styles.back}>← Back</Text>
       </TouchableOpacity>
-      <Text style={styles.header}>{session.name}</Text>
+      <Text style={styles.header}>{selectedSession.name}</Text>
       <FlatList
-        data={session.sets}
+        data={selectedSession.sets}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
-          <SetCard item={item} onSetPress={onSetPress} promptRename={promptRename} onDeleteSet={onDeleteSet}/>
+          <SetCard item={item} />
         )}
       />
-      <BluetoothRecordingScreen
-        device={connectedDevice}
-        onDisconnect={() => {}}
-        onNewSet={handleNewSet}
-      />
+      <BluetoothRecordingScreen />
     </View>
   );
 }

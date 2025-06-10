@@ -11,6 +11,7 @@
 		4A211CE98DFF57C129A220F9 /* libPods-NotesAppFixed.a in Frameworks */ = {isa = PBXBuildFile; fileRef = F2F2F6F69D4E33AA2FE0236B /* libPods-NotesAppFixed.a */; };
 		761780ED2CA45674006654EE /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 761780EC2CA45674006654EE /* AppDelegate.swift */; };
 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
+		A34453932DF38C5D00EEEF7C /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = A34453922DF38C5D00EEEF7C /* GoogleService-Info.plist */; };
 		A831761880FA081870ED428B /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */; };
 /* End PBXBuildFile section */
 
@@ -23,6 +24,7 @@
 		5DBB81A6ACC438C73A869549 /* Pods-NotesAppFixed.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-NotesAppFixed.debug.xcconfig"; path = "Target Support Files/Pods-NotesAppFixed/Pods-NotesAppFixed.debug.xcconfig"; sourceTree = "<group>"; };
 		761780EC2CA45674006654EE /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppDelegate.swift; path = NotesAppFixed/AppDelegate.swift; sourceTree = "<group>"; };
 		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = NotesAppFixed/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		A34453922DF38C5D00EEEF7C /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = "GoogleService-Info.plist"; path = "../../../Downloads/GoogleService-Info.plist"; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
 		F2F2F6F69D4E33AA2FE0236B /* libPods-NotesAppFixed.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-NotesAppFixed.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -42,6 +44,7 @@
 		13B07FAE1A68108700A75B9A /* NotesAppFixed */ = {
 			isa = PBXGroup;
 			children = (
+				A34453922DF38C5D00EEEF7C /* GoogleService-Info.plist */,
 				13B07FB51A68108700A75B9A /* Images.xcassets */,
 				761780EC2CA45674006654EE /* AppDelegate.swift */,
 				13B07FB61A68108700A75B9A /* Info.plist */,
@@ -159,6 +162,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */,
+				A34453932DF38C5D00EEEF7C /* GoogleService-Info.plist in Resources */,
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
 				A831761880FA081870ED428B /* PrivacyInfo.xcprivacy in Resources */,
 			);

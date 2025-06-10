@@ -1,20 +1,29 @@
 // src/screens/SetDetailScreen.js
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, FlatList } from 'react-native';
+import { useApp } from '../providers/NavigationContext';
+export default function SetDetailScreen({}) {
+  const {
+    selectedSet, view, setView
+  } = useApp()
+  
+  const goBack = () => {
+    if (view === 'SetDetail') setView('SessionDetail');
+    else if (view === 'SessionDetail') setView('Home');
+  };
 
-export default function SetDetailScreen({ set, onBack }) {
   return (
     <View style={styles.container}>
-      <TouchableOpacity onPress={onBack}>
+      <TouchableOpacity onPress={goBack}>
         <Text style={styles.back}>← Back</Text>
       </TouchableOpacity>
-      <Text style={styles.title}>{set.exercise}</Text>
+      <Text style={styles.title}>{selectedSet.exercise}</Text>
       <Text style={styles.summary}>
-        Total Reps: {set.reps}
+        Total Reps: {selectedSet.reps}
       </Text>
 
       <FlatList
-        data={set.repData}
+        data={selectedSet.repData}
         keyExtractor={(item) => item.id}
         renderItem={({ item, index }) => (
           <View style={styles.repCard}>

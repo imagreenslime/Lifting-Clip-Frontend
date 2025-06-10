@@ -1,14 +1,29 @@
+// src/screens/HomeScreen.js
 import React from 'react';
-import { View, FlatList, StyleSheet, Alert, TouchableOpacity, Text, Button } from 'react-native';
+import { View, FlatList, StyleSheet, Button } from 'react-native';
 import SessionCard from '../components/SessionCard';
+import { useApp } from '../providers/NavigationContext';
 
 
+export default function HomeScreen({}) {
+  const {
+    sessions, setSelectedSession,
+    setSessions, setView
+  } = useApp();
 
-export default function HomeScreen({ sessions, onSessionPress, onDeleteSession, onRenameSession, onAddSession}) {
-  const promptRename = (id) => {
-    Alert.prompt('Rename Session', 'Enter new name:', (text) => {
-      if (text.trim()) onRenameSession(id, text);
-    })};
+  const addSession = () => {
+    const newSession = {
+      id: Date.now().toString(),
+      name: 'New Session',
+      date: new Date().toISOString().split('T')[0],
+      sets: [],
+    };
+    const updatedSessions = [newSession, ...sessions];
+    setSessions(updatedSessions);
+    setSelectedSession(newSession);
+    setView('SessionDetail');
+  };
+
     return (
       <View style={styles.container}>
         <FlatList
@@ -16,12 +31,12 @@ export default function HomeScreen({ sessions, onSessionPress, onDeleteSession, 
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => (
             <View style={styles.card}>
-              <SessionCard item={item} onSessionPress={onSessionPress} promptRename={promptRename} onDeleteSession={onDeleteSession}/>
+              <SessionCard item={item}/>
             </View>
           )}
         />
       <View style={{ padding: 20 }}>
-      <Button title="➕ Add Session" onPress={onAddSession} />
+      <Button title="➕ Add Session" onPress={addSession} />
       </View>
       </View>
     );

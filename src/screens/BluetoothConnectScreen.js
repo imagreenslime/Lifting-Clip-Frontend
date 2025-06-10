@@ -1,8 +1,20 @@
+// src/screens/BluetoothConnectScreen.js
 import React, { useEffect, useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
 import BluetoothService from '../services/BluetoothService';
+import { useApp } from '../providers/NavigationContext';
 
-export default function BluetoothScreen({ onConnect, connectedDevice, onDisconnect }) {
+export default function BluetoothScreen({}) {
+
+  const {
+    setConnectedDevice, setView, connectedDevice
+  } = useApp()
+
+  const onConnect=((device) => {
+    setConnectedDevice(device);
+    setView('BluetoothRecording');
+  })
+
   const [foundDevices, setFoundDevices] = useState([]);
 
   const handleDisconnect = async () => {
@@ -14,7 +26,7 @@ export default function BluetoothScreen({ onConnect, connectedDevice, onDisconne
       }
     }
     BluetoothService.disconnect();
-    if (onDisconnect) onDisconnect();
+    setConnectedDevice(null);
   };
 
   useEffect(() => {

@@ -1,164 +1,35 @@
 // src/navigation/navigation.js
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-
+import { useApp } from '../providers/NavigationContext';
 import HomeScreen from '../screens/HomeScreen';
 import SessionDetailScreen from '../screens/SessionDetailScreen';
 import SetDetailScreen from '../screens/SetDetailsScreen';
 import BluetoothConnectScreen from '../screens/BluetoothConnectScreen';
-import BluetoothRecordingScreen from '../screens/BluetoothRecordingScreen';
-
+import AccountScreen from '../screens/AccountScreen';
 // TODO LIST
 // 1) Firebase authentification
 // 2) Add database and etc.
 // 3) UseContext() to remove prop drilling
 
 
-export default function App() {
-  const [sessions, setSessions] = useState([
-    {
-      id: '1',
-      name: 'Push Day',
-      date: '2025-06-01',
-      sets: [
-        { id: '1', exercise: 'Bench Press', reps: 10, tempo: '2-1-2', duration: '30s' },
-        { id: '2', exercise: 'Incline Press', reps: 8, tempo: '2-1-1', duration: '28s' },
-      ]
-    },
-    {
-      id: '2',
-      name: 'Legs 🔥',
-      date: '2025-05-31',
-      sets: [
-        { id: '3', exercise: 'Squat', reps: 12, tempo: '3-1-3', duration: '40s' },
-        { id: '4', exercise: 'Leg Press', reps: 10, tempo: '2-1-2', duration: '35s' },
-      ]
-    },
-  ])
-
-  useEffect(() => {
-    console.log(sessions);
-  }, [sessions])
-
-
-  const [tab, setTab] = useState('Home'); // Home or Bluetooth
-  const [view, setView] = useState('Home'); // Home, SessionDetail, SetDetail
-  const [selectedSession, setSelectedSession] = useState(null);
-  const [selectedSet, setSelectedSet] = useState(null);
-  const [connectedDevice, setConnectedDevice] = useState(null);
-
-  const addSetToSession = (sessionId, newSet) => {
-    setSessions(prevSessions => {
-      const updated = prevSessions.map(s =>
-        s.id === sessionId
-          ? { ...s, sets: [...s.sets, newSet] }
-          : s
-      );
-      const updatedSession = updated.find(s => s.id === sessionId);
-      setSelectedSession(updatedSession);
-      return updated;
-    });
-  };
-
-  const updateSessions = (newSessions) => setSessions([...newSessions]);
-
-  const deleteSession = (id) => {
-    updateSessions(sessions.filter(session => session.id !== id));
-    if (selectedSession?.id === id) setView('Home');
-  };
-
-  const renameSession = (id, newName) => {
-    updateSessions(sessions.map(s => s.id === id ? { ...s, name: newName } : s));
-  };
-
-  const deleteSet = (sessionId, setId) => {
-  setSessions(prevSessions => {
-    const updated = prevSessions.map(s =>
-      s.id === sessionId
-        ? { ...s, sets: s.sets.filter(set => set.id !== setId) }
-        : s
-    );
-    const updatedSession = updated.find(s => s.id === sessionId);
-    setSelectedSession(updatedSession);
-    return updated;
-    })
-  };
-
-  const renameSet = (sessionId, setId, newName) => {
-    setSessions(prevSessions => {
-        const updated = prevSessions.map(s =>
-          s.id === sessionId
-            ? {
-                ...s,
-                sets: s.sets.map(set =>
-                  set.id === setId ? { ...set, exercise: newName } : set
-                ),
-              }
-            : s
-        );
-        const updatedSession = updated.find(s => s.id === sessionId);
-        setSelectedSession(updatedSession);
-        return updated;
-      });
-  };
-
-  const addSession = () => {
-    const newSession = {
-      id: Date.now().toString(),
-      name: 'New Session',
-      date: new Date().toISOString().split('T')[0],
-      sets: [],
-    };
-    const updatedSessions = [newSession, ...sessions];
-    setSessions(updatedSessions);
-    setSelectedSession(newSession);
-    setView('SessionDetail');
-  };
-
-  const goToSession = (session) => {
-    setSelectedSession(session);
-    setView('SessionDetail');
-  };
-
-  const goToSet = (set) => {
-    setSelectedSet(set);
-    setView('SetDetail');
-  };
-
-  const goBack = () => {
-    if (view === 'SetDetail') setView('SessionDetail');
-    else if (view === 'SessionDetail') setView('Home');
-  };
+export default function Navigation() {
+  const {
+    tab, setTab,
+    view, setView,
+  } = useApp();
+  
 
   const renderScreen = () => {
-    if (tab === 'Bluetooth') {
-        return (
-            <BluetoothConnectScreen onConnect={(device) => {
-            setConnectedDevice(device);
-            setView('BluetoothRecording');
-            }} 
-            connectedDevice={connectedDevice}
-            onDisconnect={() => setConnectedDevice(null)}
-            />
-        );
-          
-    }
-
-    if (view === 'Home') return <HomeScreen sessions={sessions} onSessionPress={goToSession} 
-    onDeleteSession={deleteSession} onRenameSession={renameSession} 
-    onAddSession={addSession}/>;
-
-    if (view === 'SessionDetail') return <SessionDetailScreen 
-        session={selectedSession} onSetPress={goToSet} 
-        onBack={goBack} onDeleteSet={(setId) => deleteSet(selectedSession.id, setId)} 
-        onRenameSet={(setId, name) => renameSet(selectedSession.id, setId, name)} 
-        connectedDevice={connectedDevice} onAddSet={(newSet) => addSetToSession(selectedSession.id, newSet)}
-
-    />;
-    if (view === 'SetDetail') return <SetDetailScreen set={selectedSet} onBack={goBack} />;
+    if (tab === 'Bluetooth') return <BluetoothConnectScreen />;
+    if (view === 'Home') return <HomeScreen />;
+    if (view === 'SessionDetail') return <SessionDetailScreen />;
+    if (view === 'Account') return <AccountScreen />;
+    if (view === 'SetDetail') return <SetDetailScreen/>;
   };
 
   return (
+
     <View style={{ flex: 1 }}>
       <View style={{ flex: 1 }}>{renderScreen()}</View>
       <View style={styles.tabBar}>
@@ -168,9 +39,12 @@ export default function App() {
         <TouchableOpacity onPress={() => { setTab('Bluetooth'); setView('Bluetooth'); }} style={styles.tab}>
           <Text style={styles.tabText}>Bluetooth</Text>
         </TouchableOpacity>
-
+        <TouchableOpacity onPress={() => { setTab('Account'); setView('Account'); }} style={styles.tab}>
+          <Text style={styles.tabText}>Account</Text>
+        </TouchableOpacity>
       </View>
     </View>
+
   );
 }
 

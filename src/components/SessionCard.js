@@ -1,11 +1,38 @@
 // src/components/SessionCard.js
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Alert} from 'react-native';
+import { useApp } from '../providers/NavigationContext';
+export default function SessionCard({ item }) {
+  const {
+    view, setView,
+    sessions, setSessions,
+    selectedSession, setSelectedSession,
+  } = useApp();
 
-export default function SessionCard({ item, onSessionPress, promptRename, onDeleteSession}) {
+  const updateSessions = (newSessions) => setSessions([...newSessions]);
+
+  const deleteSession = (id) => {
+    updateSessions(sessions.filter(session => session.id !== id));
+    if (selectedSession?.id === id) setView('Home');
+  };
+
+  const renameSession = (id, newName) => {
+    updateSessions(sessions.map(s => s.id === id ? { ...s, name: newName } : s));
+  };
+
+  const goToSession = (session) => {
+    setSelectedSession(session);
+    setView('SessionDetail');
+  };
+
+  const promptRename = (id) => {
+    Alert.prompt('Rename Session', 'Enter new name:', (text) => {
+      if (text.trim()) renameSession(id, text);
+    })};
+
   return (
   <View style={styles.card}>
-    <TouchableOpacity style={styles.cardLeft} onPress={() => onSessionPress(item)}>
+    <TouchableOpacity style={styles.cardLeft} onPress={() => goToSession(item)}>
       <Text style={styles.name}>{item.name}</Text>
       <Text style={styles.details}>{item.date}</Text>
     </TouchableOpacity>
@@ -13,7 +40,7 @@ export default function SessionCard({ item, onSessionPress, promptRename, onDele
       <TouchableOpacity onPress={() => promptRename(item.id)}>
         <Text style={styles.btn}>✏️</Text>
       </TouchableOpacity>
-      <TouchableOpacity onPress={() => onDeleteSession(item.id)}>
+      <TouchableOpacity onPress={() => deleteSession(item.id)}>
         <Text style={styles.btn}>🗑</Text>
       </TouchableOpacity>
     </View>
