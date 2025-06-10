@@ -3,7 +3,7 @@ import React, { useEffect,useState} from 'react';
 import { View, Text, FlatList, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import BluetoothRecordingScreen from './BluetoothRecordingScreen';
 import SetCard from '../components/SetCard';
-import { useApp } from '../providers/NavigationContext';
+import { useNavigation } from '../context/NavigationContext';
 export default function SessionDetailScreen({ onAddSet}) {
 
   const {
@@ -11,7 +11,7 @@ export default function SessionDetailScreen({ onAddSet}) {
     selectedSession, setSelectedSession,
     setView, view, 
     connectedDevice
-  } = useApp()
+  } = useNavigation()
   
   const goBack = () => {
     if (view === 'SetDetail') setView('SessionDetail');

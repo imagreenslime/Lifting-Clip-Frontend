@@ -1,7 +1,7 @@
 // App.tsx
-import React, { useEffect, useState } from 'react';
-import { View, Button, Text, ScrollView, StyleSheet} from 'react-native';
-import { NavigationProvider } from './src/providers/NavigationContext';
+import React from 'react';
+import { View, StyleSheet} from 'react-native';
+import { NavigationProvider } from './src/context/NavigationContext';
 import Navigation from './src/navigation/navigation';
 import SafeAreaWrapper from './src/components/SafeAreaWrapper';
 import { AuthProvider } from './src/auth/AuthProvider';

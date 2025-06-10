@@ -2,13 +2,13 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
 import BluetoothService from '../services/BluetoothService';
-import { useApp } from '../providers/NavigationContext';
+import { useNavigation } from '../context/NavigationContext';
 
 export default function BluetoothScreen({}) {
 
   const {
     setConnectedDevice, setView, connectedDevice
-  } = useApp()
+  } = useNavigation()
 
   const onConnect=((device) => {
     setConnectedDevice(device);

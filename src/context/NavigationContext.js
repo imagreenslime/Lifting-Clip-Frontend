@@ -45,4 +45,4 @@ export const NavigationProvider = ({ children }) => {
   );
 };
 
-export const useApp = () => useContext(NavigationContext);
+export const useNavigation = () => useContext(NavigationContext);

@@ -1,12 +1,12 @@
 // src/screens/SetDetailScreen.js
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, FlatList } from 'react-native';
-import { useApp } from '../providers/NavigationContext';
+import { useNavigation } from '../context/NavigationContext';
 export default function SetDetailScreen({}) {
   const {
     selectedSet, view, setView
-  } = useApp()
-  
+  } = useNavigation()
+
   const goBack = () => {
     if (view === 'SetDetail') setView('SessionDetail');
     else if (view === 'SessionDetail') setView('Home');

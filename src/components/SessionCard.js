@@ -1,13 +1,13 @@
 // src/components/SessionCard.js
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Alert} from 'react-native';
-import { useApp } from '../providers/NavigationContext';
+import { useNavigation } from '../context/NavigationContext';
 export default function SessionCard({ item }) {
   const {
     view, setView,
     sessions, setSessions,
     selectedSession, setSelectedSession,
-  } = useApp();
+  } = useNavigation();
 
   const updateSessions = (newSessions) => setSessions([...newSessions]);
 

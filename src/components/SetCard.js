@@ -1,11 +1,11 @@
 // src/components/SetCard.js
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
-import { useApp } from '../providers/NavigationContext';
+import { useNavigation } from '../context/NavigationContext';
 export default function SetCard({ item }) {
   const {
     setSelectedSet, setView, setSelectedSession, setSessions, selectedSession
-  } = useApp()
+  } = useNavigation()
 
   const goToSet = (set) => {
     setSelectedSet(set);

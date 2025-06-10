@@ -3,8 +3,9 @@ import React, { useState } from 'react';
 import { View, TextInput, Button, Text, Alert } from 'react-native';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../../firebaseConfig';
-
+import { useNavigation } from '../context/NavigationContext';
 export default function LoginScreen() {
+  const {setView} = useNavigation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -44,6 +45,7 @@ export default function LoginScreen() {
         style={{ borderWidth: 1, marginBottom: 20, padding: 10 }}
       />
       <Button title={loading ? 'Logging in...' : 'Login'} onPress={handleLogin} disabled={loading} />
+      <Button title="If not made account yet" onPress={() => setView('Register')}></Button>
     </View>
   );
 }

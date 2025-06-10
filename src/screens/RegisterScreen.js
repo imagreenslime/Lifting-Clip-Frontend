@@ -4,8 +4,10 @@ import React, { useState } from 'react';
 import { View, TextInput, Button, Text, Alert } from 'react-native';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import {auth} from '../../firebaseConfig'
+import { useNavigation } from '../context/NavigationContext';
 
 export default function RegisterScreen() {
+  const {setView} = useNavigation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -45,6 +47,7 @@ export default function RegisterScreen() {
         style={{ borderWidth: 1, marginBottom: 20, padding: 10 }}
       />
       <Button title={loading ? 'Creating...' : 'Register'} onPress={handleRegister} disabled={loading} />
+      <Button title="If not made account yet" onPress={() => setView('Login')}></Button>
     </View>
   );
 }

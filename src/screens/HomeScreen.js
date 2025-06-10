@@ -2,14 +2,14 @@
 import React from 'react';
 import { View, FlatList, StyleSheet, Button } from 'react-native';
 import SessionCard from '../components/SessionCard';
-import { useApp } from '../providers/NavigationContext';
+import { useNavigation } from '../context/NavigationContext';
 
 
 export default function HomeScreen({}) {
   const {
     sessions, setSelectedSession,
     setSessions, setView
-  } = useApp();
+  } = useNavigation();
 
   const addSession = () => {
     const newSession = {

@@ -2,11 +2,11 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import BluetoothService from '../services/BluetoothService';
-import { useApp } from '../providers/NavigationContext';
+import { useNavigation } from '../context/NavigationContext';
 export default function BluetoothRecordingScreen({ }) {
   const {
     connectedDevice, selectedSession, setSessions, setSelectedSession
-  } = useApp();
+  } = useNavigation();
 
   const [processedReps, setProcessedReps] = useState(new Set());
   const onDisconnect = () => {
