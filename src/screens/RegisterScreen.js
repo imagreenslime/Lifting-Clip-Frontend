@@ -3,7 +3,8 @@
 import React, { useState } from 'react';
 import { View, TextInput, Button, Text, Alert } from 'react-native';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
-import {auth} from '../../firebaseConfig'
+import {auth, db} from '../../firebaseConfig'
+import { collection, doc, setDoc, addDoc } from 'firebase/firestore';
 import { useNavigation } from '../context/NavigationContext';
 
 export default function RegisterScreen() {
@@ -20,6 +21,41 @@ export default function RegisterScreen() {
     try {
       setLoading(true);
       await createUserWithEmailAndPassword(auth, email, password);
+      const uid = auth.currentUser.uid;
+      
+      await setDoc(doc(db, 'users', uid), {
+        createdAt: new Date().toISOString(),
+        email: email,
+      });
+
+      const sessionsRef = collection(db, 'users', uid, 'sessions');
+      await addDoc(sessionsRef, {
+        name: 'Sample Session',
+        date: new Date().toISOString().split('T')[0],
+        id: 1,
+        sets: [
+          {
+            id: Date.now().toString(),
+            exercise: 'Sample Bench Press',
+            duration: '30s',
+            repdata: {
+              rep1: {
+                id: 'rep1',
+                duration: '12.5s',
+                rom: '25.4 inches',
+                tempo: '1.25s-5.5s-6.25s'
+              },
+              rep2: {
+                id: 'rep2',
+                duration: '12.5s',
+                rom: '26 inches',
+                tempo: '1.25s-5.5s-6.25s'
+              }
+            }
+          }
+        ]
+      });
+
       Alert.alert('Success', 'Account created!');
     } catch (error) {
       Alert.alert('Error', error.message);

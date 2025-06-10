@@ -1,50 +1,74 @@
 // src/components/SessionCard.js
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Alert} from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import { useNavigation } from '../context/NavigationContext';
+import { useUserSessions } from '../hooks/useUserSessions';
+
 export default function SessionCard({ item }) {
+  const { deleteSession, updateSession } = useUserSessions();
   const {
-    view, setView,
-    sessions, setSessions,
-    selectedSession, setSelectedSession,
+    setView,
+    selectedSession,
+    setSelectedSession,
   } = useNavigation();
 
-  const updateSessions = (newSessions) => setSessions([...newSessions]);
-
-  const deleteSession = (id) => {
-    updateSessions(sessions.filter(session => session.id !== id));
-    if (selectedSession?.id === id) setView('Home');
-  };
-
-  const renameSession = (id, newName) => {
-    updateSessions(sessions.map(s => s.id === id ? { ...s, name: newName } : s));
-  };
-
-  const goToSession = (session) => {
-    setSelectedSession(session);
+  const goToSession = () => {
+    setSelectedSession(item);
     setView('SessionDetail');
   };
+  console.log("Session card items:", item);
+  const handleDelete = () => {
+    console.log('Deleting session with id:', item?.id);
+    Alert.alert(
+      'Delete Session',
+      'Are you sure you want to delete this session?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await deleteSession(item.id);
+              if (selectedSession?.id === item.id) setView('Home');
+            } catch (err) {
+              Alert.alert('Error', 'Failed to delete session.');
+              console.error('Delete error:', err);
+            }
+          },
+        },
+      ]
+    );
+  };
 
-  const promptRename = (id) => {
-    Alert.prompt('Rename Session', 'Enter new name:', (text) => {
-      if (text.trim()) renameSession(id, text);
-    })};
+  const promptRename = () => {
+    Alert.prompt('Rename Session', 'Enter new name:', async (text) => {
+      const newName = text.trim();
+      if (!newName) return;
+      try {
+        await updateSession(item.id, { name: newName });
+      } catch (err) {
+        Alert.alert('Error', 'Failed to rename session.');
+        console.error('Rename error:', err);
+      }
+    });
+  };
 
   return (
-  <View style={styles.card}>
-    <TouchableOpacity style={styles.cardLeft} onPress={() => goToSession(item)}>
-      <Text style={styles.name}>{item.name}</Text>
-      <Text style={styles.details}>{item.date}</Text>
-    </TouchableOpacity>
-    <View style={styles.cardRight}>
-      <TouchableOpacity onPress={() => promptRename(item.id)}>
-        <Text style={styles.btn}>✏️</Text>
+    <View style={styles.card}>
+      <TouchableOpacity style={styles.cardLeft} onPress={goToSession}>
+        <Text style={styles.name}>{item.name}</Text>
+        <Text style={styles.details}>{item.date}</Text>
       </TouchableOpacity>
-      <TouchableOpacity onPress={() => deleteSession(item.id)}>
-        <Text style={styles.btn}>🗑</Text>
-      </TouchableOpacity>
+      <View style={styles.cardRight}>
+        <TouchableOpacity onPress={promptRename}>
+          <Text style={styles.btn}>✏️</Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={handleDelete}>
+          <Text style={styles.btn}>🗑</Text>
+        </TouchableOpacity>
+      </View>
     </View>
-  </View>
   );
 }
 

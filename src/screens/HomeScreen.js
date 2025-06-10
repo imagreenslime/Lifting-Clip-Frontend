@@ -3,24 +3,24 @@ import React from 'react';
 import { View, FlatList, StyleSheet, Button } from 'react-native';
 import SessionCard from '../components/SessionCard';
 import { useNavigation } from '../context/NavigationContext';
-
+import { useUserSessions } from '../hooks/useUserSessions';
 
 export default function HomeScreen({}) {
   const {
-    sessions, setSelectedSession,
-    setSessions, setView
+    sessions, addSession: addFirestoreSession
+  } = useUserSessions();
+  const {
+    setSelectedSession, setView
   } = useNavigation();
 
-  const addSession = () => {
+  const addSession = async () => {
     const newSession = {
-      id: Date.now().toString(),
       name: 'New Session',
       date: new Date().toISOString().split('T')[0],
       sets: [],
     };
-    const updatedSessions = [newSession, ...sessions];
-    setSessions(updatedSessions);
-    setSelectedSession(newSession);
+    const saved = await addFirestoreSession(newSession);
+    setSelectedSession(saved);
     setView('SessionDetail');
   };
 

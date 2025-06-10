@@ -4,9 +4,7 @@ import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { useNavigation } from '../context/NavigationContext';
 import { HomeScreen, SessionDetailScreen, SetDetailScreen, BluetoothConnectScreen, AccountScreen, LoginScreen, RegisterScreen } from '../screens'
 // TODO LIST
-// 1) Firebase authentification
-// 2) Add database and etc.
-// 3) UseContext() to remove prop drilling
+// FIX rename session and fix DELET session
 
 
 export default function Navigation() {

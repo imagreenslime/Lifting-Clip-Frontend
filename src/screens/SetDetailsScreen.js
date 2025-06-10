@@ -2,15 +2,20 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, FlatList } from 'react-native';
 import { useNavigation } from '../context/NavigationContext';
+
 export default function SetDetailScreen({}) {
   const {
     selectedSet, view, setView
-  } = useNavigation()
+  } = useNavigation();
 
   const goBack = () => {
     if (view === 'SetDetail') setView('SessionDetail');
     else if (view === 'SessionDetail') setView('Home');
   };
+
+  const repDataArray = selectedSet.repdata
+    ? Object.values(selectedSet.repdata)
+    : [];
 
   return (
     <View style={styles.container}>
@@ -19,11 +24,11 @@ export default function SetDetailScreen({}) {
       </TouchableOpacity>
       <Text style={styles.title}>{selectedSet.exercise}</Text>
       <Text style={styles.summary}>
-        Total Reps: {selectedSet.reps}
+        Total Reps: {repDataArray.length}
       </Text>
 
       <FlatList
-        data={selectedSet.repData}
+        data={repDataArray}
         keyExtractor={(item) => item.id}
         renderItem={({ item, index }) => (
           <View style={styles.repCard}>
