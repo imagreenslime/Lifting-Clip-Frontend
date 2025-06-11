@@ -4,8 +4,8 @@ import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { useNavigation } from '../context/NavigationContext';
 import { HomeScreen, SessionDetailScreen, SetDetailScreen, BluetoothConnectScreen, AccountScreen, LoginScreen, RegisterScreen } from '../screens'
 // TODO LIST
-// FIX rename session and fix DELET session
-
+// rework bluetooth recording screen to work with firestore
+/
 
 export default function Navigation() {
   const {

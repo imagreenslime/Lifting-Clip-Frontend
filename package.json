@@ -15,7 +15,8 @@
     "firebase": "^11.9.0",
     "react": "19.0.0",
     "react-native": "0.78.2",
-    "react-native-ble-plx": "^3.5.0"
+    "react-native-ble-plx": "^3.5.0",
+    "uuid": "^11.1.0"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",

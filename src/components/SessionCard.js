@@ -8,29 +8,22 @@ export default function SessionCard({ item }) {
   const { deleteSession, updateSession } = useUserSessions();
   const {
     setView,
-    selectedSession,
-    setSelectedSession,
+    setSelectedSessionId,
   } = useNavigation();
 
   const goToSession = () => {
-    setSelectedSession(item);
+    setSelectedSessionId(item.id);
     setView('SessionDetail');
   };
-  console.log("Session card items:", item);
+
   const handleDelete = () => {
-    console.log('Deleting session with id:', item?.id);
-    Alert.alert(
-      'Delete Session',
-      'Are you sure you want to delete this session?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Delete',
-          style: 'destructive',
+    Alert.alert('Delete Session', 'Are you sure you want to delete this session?',
+      [{ text: 'Cancel', style: 'cancel' },{text: 'Delete', style: 'destructive',
           onPress: async () => {
             try {
               await deleteSession(item.id);
-              if (selectedSession?.id === item.id) setView('Home');
+              setView('');
+              setTimeout(() => setView('Home'), 10);
             } catch (err) {
               Alert.alert('Error', 'Failed to delete session.');
               console.error('Delete error:', err);
@@ -47,6 +40,8 @@ export default function SessionCard({ item }) {
       if (!newName) return;
       try {
         await updateSession(item.id, { name: newName });
+        setView('');
+        setTimeout(() => setView('Home'), 10);
       } catch (err) {
         Alert.alert('Error', 'Failed to rename session.');
         console.error('Rename error:', err);

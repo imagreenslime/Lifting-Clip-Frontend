@@ -4,17 +4,24 @@ import { View, Text, FlatList, StyleSheet, TouchableOpacity, Alert } from 'react
 import BluetoothRecordingScreen from './BluetoothRecordingScreen';
 import SetCard from '../components/SetCard';
 import { useNavigation } from '../context/NavigationContext';
+import { useUserSessions } from '../hooks/useUserSessions';
 
 export default function SessionDetailScreen() {
-  const {
-    selectedSession,
-    setView, view,
-  } = useNavigation();
-
+  const { selectedSessionId, setView, view, } = useNavigation();
+  const { sessions } = useUserSessions();
   const goBack = () => {
     if (view === 'SetDetail') setView('SessionDetail');
     else if (view === 'SessionDetail') setView('Home');
   };
+  const selectedSession = sessions.find(s => s.id === selectedSessionId);
+
+  if (!selectedSession) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.header}></Text>
+      </View>
+    );
+  }
 
   const setsArray = Array.isArray(selectedSession.sets)
     ? selectedSession.sets
@@ -22,6 +29,7 @@ export default function SessionDetailScreen() {
 
   return (
     <View style={styles.container}>
+      {console.log(selectedSessionId)}
       <TouchableOpacity onPress={goBack}>
         <Text style={styles.back}>← Back</Text>
       </TouchableOpacity>

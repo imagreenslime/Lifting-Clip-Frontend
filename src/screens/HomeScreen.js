@@ -10,7 +10,7 @@ export default function HomeScreen({}) {
     sessions, addSession: addFirestoreSession
   } = useUserSessions();
   const {
-    setSelectedSession, setView
+    setSelectedSessionId, setView
   } = useNavigation();
 
   const addSession = async () => {
@@ -20,7 +20,7 @@ export default function HomeScreen({}) {
       sets: [],
     };
     const saved = await addFirestoreSession(newSession);
-    setSelectedSession(saved);
+    setSelectedSessionId(saved.id);
     setView('SessionDetail');
   };
 

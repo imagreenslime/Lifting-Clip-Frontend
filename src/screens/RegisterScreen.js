@@ -8,6 +8,7 @@ import { collection, doc, setDoc, addDoc } from 'firebase/firestore';
 import { useNavigation } from '../context/NavigationContext';
 
 export default function RegisterScreen() {
+
   const {setView} = useNavigation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -57,6 +58,7 @@ export default function RegisterScreen() {
       });
 
       Alert.alert('Success', 'Account created!');
+      setView("Home");
     } catch (error) {
       Alert.alert('Error', error.message);
     } finally {

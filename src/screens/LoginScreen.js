@@ -19,6 +19,7 @@ export default function LoginScreen() {
       setLoading(true);
       await signInWithEmailAndPassword(auth, email, password);
       Alert.alert('Success', 'Logged in successfully!');
+      setView("Home");
     } catch (error) {
       Alert.alert('Login Error', error.message);
     } finally {
