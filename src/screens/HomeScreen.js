@@ -7,7 +7,7 @@ import { useUserSessions } from '../hooks/useUserSessions';
 
 export default function HomeScreen({}) {
   const {
-    sessions, addSession: addFirestoreSession
+    sessions, initializeSession
   } = useUserSessions();
   const {
     setSelectedSessionId, setView
@@ -19,7 +19,7 @@ export default function HomeScreen({}) {
       date: new Date().toISOString().split('T')[0],
       sets: [],
     };
-    const saved = await addFirestoreSession(newSession);
+    const saved = await initializeSession(newSession);
     setSelectedSessionId(saved.id);
     setView('SessionDetail');
   };

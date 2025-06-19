@@ -6,8 +6,10 @@ import { createUserWithEmailAndPassword } from 'firebase/auth';
 import {auth, db} from '../../firebaseConfig'
 import { collection, doc, setDoc, addDoc } from 'firebase/firestore';
 import { useNavigation } from '../context/NavigationContext';
+import { useUserLifts } from '../hooks/useUserLifts';
 
 export default function RegisterScreen() {
+  const { addLift } = useUserLifts();
 
   const {setView} = useNavigation();
   const [email, setEmail] = useState('');
@@ -29,6 +31,11 @@ export default function RegisterScreen() {
         email: email,
       });
 
+      const liftsRef = collection(db, 'users', uid, 'lifts');
+      await addDoc(liftsRef, { name: "squat"});
+      await addDoc(liftsRef, { name: "bench"});
+      await addDoc(liftsRef, { name: "deadlift"});
+      
       const sessionsRef = collection(db, 'users', uid, 'sessions');
       await addDoc(sessionsRef, {
         name: 'Sample Session',
@@ -57,6 +64,19 @@ export default function RegisterScreen() {
         ]
       });
 
+      const profileRef = collection(db, 'users', uid, 'profile');
+      await addDoc(profileRef, {
+        name: 'profile',
+        date: new Date().toISOString().split('T')[0],
+        id: 2,
+        info: {
+          height: '',
+          weight: '',
+          age: '',
+          gender: '',
+        }
+      });
+      
       Alert.alert('Success', 'Account created!');
       setView("Home");
     } catch (error) {

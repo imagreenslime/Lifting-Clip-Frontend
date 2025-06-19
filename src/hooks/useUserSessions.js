@@ -37,7 +37,7 @@ export function useUserSessions() {
   };
 // changing sessions
 
-  const addSessionOld = async (session) => {
+  const addSession = async (session) => {
     const ref = getSessionReference();
     const docRef = await addDoc(ref, session);
     const newSession = { id: docRef.id, ...session };
@@ -46,7 +46,7 @@ export function useUserSessions() {
     return newSession;
   };
   
-  const addSession = async () => {
+  const initializeSession = async () => {
     const ref = getSessionReference();
   
     const defaultSet = {
@@ -125,9 +125,25 @@ export function useUserSessions() {
 
 // changing sets
 
-  const addSet = async (sessionId) => {
-    
-  };
+const addSet = async (sessionId, newSet) => {
+  const uid = getUid();
+  const documentID = await findSessionIdById(uid, sessionId);
+  try {
+    const sessionDocRef = doc(db, 'users', uid, 'sessions', documentID);
+    const session = sessions.find(s => s.id === sessionId);
+    const updatedSets = [...(session?.sets || []), newSet];
+    await updateDoc(sessionDocRef, { sets: updatedSets });
+    setSessions(prev =>
+      prev.map(s =>
+        s.id === sessionId ? { ...s, sets: updatedSets } : s
+      )
+    );
+  } catch (error) {
+    console.error('Failed to add set:', error);
+    throw error;
+  }
+};
+
 
   const updateSet = async (sessionId, setId, updates) => {
     const uid = await getUid();
@@ -172,5 +188,5 @@ export function useUserSessions() {
     if (user?.uid) fetchSessions();
   }, [user]);
 
-  return { sessions, loading, addSession, deleteSession, updateSession, addSet, updateSet, deleteSet };
+  return { sessions, loading, initializeSession, deleteSession, updateSession, addSet, updateSet, deleteSet };
 }

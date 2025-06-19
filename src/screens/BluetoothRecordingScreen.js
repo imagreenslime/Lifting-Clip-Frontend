@@ -3,27 +3,18 @@ import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import BluetoothService from '../services/BluetoothService';
 import { useNavigation } from '../context/NavigationContext';
+import { useUserSessions } from '../hooks/useUserSessions';
+
 export default function BluetoothRecordingScreen({ }) {
+  const { addSet } = useUserSessions();
+
   const {
-    connectedDevice, selectedSession, setSessions, setSelectedSession
+    connectedDevice, selectedSessionId
   } = useNavigation();
 
   const [processedReps, setProcessedReps] = useState(new Set());
   const onDisconnect = () => {
     
-  };
-
-  const addSetToSession = (sessionId, newSet) => {
-    setSessions(prevSessions => {
-      const updated = prevSessions.map(s =>
-        s.id === sessionId
-          ? { ...s, sets: [...s.sets, newSet] }
-          : s
-      );
-      const updatedSession = updated.find(s => s.id === sessionId);
-      setSelectedSession(updatedSession);
-      return updated;
-    });
   };
 
   BluetoothService.onSetUpdate((summaries) => {
@@ -48,7 +39,8 @@ export default function BluetoothRecordingScreen({ }) {
       })),
     };
   
-    addSetToSession(selectedSession.id, convertedSet);
+    addSet(selectedSessionId, convertedSet);
+
   
     setProcessedReps(prev => {
       const updated = new Set(prev);

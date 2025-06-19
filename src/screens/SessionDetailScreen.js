@@ -27,6 +27,7 @@ export default function SessionDetailScreen() {
     ? selectedSession.sets
     : Object.values(selectedSession.sets || {});
 
+
   return (
     <View style={styles.container}>
       {console.log(selectedSessionId)}
@@ -37,7 +38,7 @@ export default function SessionDetailScreen() {
       <FlatList
         data={setsArray}
         keyExtractor={(item) => item.id}
-        renderItem={({ item }) => <SetCard item={item} />}
+        renderItem={({ item }) => <SetCard item={item}/>}
       />
       <BluetoothRecordingScreen />
     </View>
