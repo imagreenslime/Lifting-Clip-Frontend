@@ -4,21 +4,28 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, FlatList, TextInput, Alert } from 'react-native';
 import { useNavigation } from '../context/NavigationContext';
 import { useUserSessions } from '../hooks/useUserSessions';
-
+import RepCard from '../components/RepCard';
 export default function SetDetailScreen() {
   const { selectedSet, view, setView, selectedSessionId } = useNavigation();
-  const { updateSet } = useUserSessions();
+  const { updateSet, addRep, sessions} = useUserSessions();
 
   const [totalRpe, setTotalRpe] = useState('');
   const [repRpeData, setRepRpeData] = useState({});
+
+  const selectedSession = Array.isArray(sessions)
+  ? sessions.find(s => s.id === selectedSessionId)
+  : null;
+
+  const currentSet = selectedSession?.sets?.find(set => set.id === selectedSet.id);
+
 
   const goBack = () => {
     if (view === 'SetDetail') setView('SessionDetail');
     else if (view === 'SessionDetail') setView('Home');
   };
 
-  const repDataArray = selectedSet?.repdata
-  ? Object.values(selectedSet.repdata).sort((a, b) => {
+  const repDataArray = currentSet?.repdata
+  ? Object.values(currentSet.repdata).sort((a, b) => {
       const numA = parseInt(a.id.replace(/\D/g, ''), 10);
       const numB = parseInt(b.id.replace(/\D/g, ''), 10);
       return numA - numB;
@@ -52,16 +59,6 @@ export default function SetDetailScreen() {
     saveRepRpe(newRepData, rpeNum);
   };
 
-  const handleRepRpeChange = (repId, value) => {
-    const newRpe = parseInt(value, 10) || '';
-    const newRepData = { ...repRpeData, [repId]: newRpe };
-    setRepRpeData(newRepData);
-    const currentRpeValues = Object.values(newRepData).map(v => parseInt(v) || 0);
-    const computedTotalRpe = Math.max(...currentRpeValues);
-    setTotalRpe(computedTotalRpe.toString());
-    saveRepRpe(newRepData, computedTotalRpe);
-  };
-
   const saveRepRpe = async (newRepData, rpeToSave) => {
     const updatedRepdata = { ...selectedSet.repdata };
 
@@ -77,27 +74,8 @@ export default function SetDetailScreen() {
     }
   };
 
-  const renderRepRow = ({ item, index }) => {
-    const repId = item.id;
-;
-    return (
-      <View style={styles.repCard}>
-        <Text style={styles.repHeader}>Rep {index + 1}</Text>
-        <Text>Duration: {item.duration}</Text>
-        <Text>ROM: {item.rom}</Text>
-        <Text>Tempo: {item.tempo}</Text>
-        <View style={styles.rpeRow}>
-          <Text style={styles.rpeLabel}>RPE:</Text>
-          <TextInput
-            style={styles.repInput}
-            keyboardType="numeric"
-            value={repRpeData[repId]?.toString() || ''}
-            onChangeText={(v) => handleRepRpeChange(repId, v)}
-            placeholder="RPE"
-          />
-        </View>
-      </View>
-    );
+  const renderRepRow = ({ item, index }) => { 
+    return <RepCard item={item} index={index} />;
   };
 
   return (
@@ -126,6 +104,9 @@ export default function SetDetailScreen() {
         renderItem={renderRepRow}
         ListEmptyComponent={<Text>No rep data available.</Text>}
       />
+      <TouchableOpacity onPress={() => addRep(selectedSessionId, selectedSet.id)}>
+        <Text style={{ color: '#4CAF50', fontWeight: 'bold' }}>+ Add Rep</Text>
+      </TouchableOpacity>
     </View>
   );
 }

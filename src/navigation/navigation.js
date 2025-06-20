@@ -8,11 +8,7 @@ import { HomeScreen, SessionDetailScreen, SetDetailScreen, BluetoothConnectScree
 // BACKEND/UX
 // rework bluetooth recording screen to work with firestore
 // add rep/adjust rep function
-// database of which exercises to choose from and send to backend: squat, bench, deadlift, cable, etc.
-// input height, weight, age, etc on account pfp, put into firestore
-
 // UI
-// tab for supported exercises
 // make buttons bigger, wider, and rectangular shaped, 
 // animations
 // 3 dots on each session instead of 1 million buttons
@@ -22,6 +18,7 @@ import { HomeScreen, SessionDetailScreen, SetDetailScreen, BluetoothConnectScree
 
 // people put what RPE it felt like
 // average concentric time for RPE will be outputted for each lift
+
 export default function Navigation() {
   const {
     view, setView,

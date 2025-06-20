@@ -125,25 +125,32 @@ export function useUserSessions() {
 
 // changing sets
 
-const addSet = async (sessionId, newSet) => {
-  const uid = getUid();
-  const documentID = await findSessionIdById(uid, sessionId);
-  try {
-    const sessionDocRef = doc(db, 'users', uid, 'sessions', documentID);
-    const session = sessions.find(s => s.id === sessionId);
-    const updatedSets = [...(session?.sets || []), newSet];
-    await updateDoc(sessionDocRef, { sets: updatedSets });
-    setSessions(prev =>
-      prev.map(s =>
-        s.id === sessionId ? { ...s, sets: updatedSets } : s
-      )
-    );
-  } catch (error) {
-    console.error('Failed to add set:', error);
-    throw error;
-  }
-};
+  const addSet = async (sessionId) => {
+    const uid = getUid();
+    const documentID = await findSessionIdById(uid, sessionId);
 
+    const session = sessions.find(s => s.id === sessionId);
+    if (!session) return;
+
+    const newSet = {
+      id: Date.now().toString(),
+      exercise: 'Untitled Set',
+      liftType: '',
+      duration: '0s',
+      totalRpe: '',
+      repdata: {},
+    };
+
+    const updatedSets = [...session.sets, newSet];
+
+    await updateDoc(doc(db, 'users', uid, 'sessions', documentID), {
+      sets: updatedSets
+    });
+
+    setSessions(prev => prev.map(s =>
+      s.id === sessionId ? { ...s, sets: updatedSets } : s
+    ));
+  };
 
   const updateSet = async (sessionId, setId, updates) => {
     const uid = await getUid();
@@ -171,6 +178,8 @@ const addSet = async (sessionId, newSet) => {
     try {
       const session = sessions.find(s => s.id === sessionId);
       if (!session) return;
+      console.log("sessions: ", session.sets);
+      console.log("set id: ", setId);
       const updatedSets = session.sets.filter(set => set.id !== setId);
       const sessionDocRef = await doc(db, 'users', uid, 'sessions', documentID);
       await setDoc(sessionDocRef, {sets: updatedSets}, { merge: true });
@@ -184,9 +193,105 @@ const addSet = async (sessionId, newSet) => {
     }
   };
 
+  // reps
+
+  const addRep = async (sessionId, setId) => {
+    const uid = getUid();
+    const documentID = await findSessionIdById(uid, sessionId);
+  
+    const session = sessions.find(s => s.id === sessionId);
+    if (!session) return;
+  
+    const targetSet = session.sets.find(set => set.id === setId);
+    if (!targetSet) return;
+  
+    const newRepId = `rep-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+
+    const newRep = {
+      id: newRepId,
+      duration: '0.00s',
+      rom: '0',
+      tempo: '',
+      rpe: '',
+    };
+  
+    const updatedRepdata = { ...targetSet.repdata, [newRepId]: newRep };
+  
+    const updatedSets = session.sets.map(set =>
+      set.id === setId ? { ...set, repdata: updatedRepdata } : set
+    );
+  
+    await updateDoc(doc(db, 'users', uid, 'sessions', documentID), {
+      sets: updatedSets
+    });
+  
+    setSessions(prev => prev.map(s =>
+      s.id === sessionId ? { ...s, sets: updatedSets } : s
+    ));
+  };
+
+  const updateRep = async (sessionId, setId, repId, updates) => {
+    const uid = getUid();
+    const documentID = await findSessionIdById(uid, sessionId);
+  
+    const session = sessions.find(s => s.id === sessionId);
+    if (!session) return;
+  
+    const targetSet = session.sets.find(set => set.id === setId);
+    if (!targetSet) return;
+  
+    const targetRep = targetSet.repdata?.[repId];
+    if (!targetRep) return;
+  
+    const updatedRepdata = {
+      ...targetSet.repdata,
+      [repId]: { ...targetRep, ...updates }
+    };
+  
+    const updatedSets = session.sets.map(set =>
+      set.id === setId ? { ...set, repdata: updatedRepdata } : set
+    );
+  
+    const sessionDocRef = doc(db, 'users', uid, 'sessions', documentID);
+  
+    await updateDoc(sessionDocRef, { sets: updatedSets });
+  
+    setSessions(prev => prev.map(s =>
+      s.id === sessionId ? { ...s, sets: updatedSets } : s
+    ));
+  };
+
+  const deleteRep = async (sessionId, setId, repId) => {
+    console.log(sessionId, setId, repId);
+    const uid = getUid();
+    const documentID = await findSessionIdById(uid, sessionId);
+  
+    const session = sessions.find(s => s.id === sessionId);
+    if (!session) return;
+  
+    const targetSet = session.sets.find(set => set.id === setId);
+    if (!targetSet) return;
+  
+    const updatedRepdata = { ...targetSet.repdata };
+    delete updatedRepdata[repId];
+    console.log('checkpoing 1');
+    const updatedSets = session.sets.map(set =>
+      set.id === setId ? { ...set, repdata: updatedRepdata } : set
+    );
+  
+    const sessionDocRef = doc(db, 'users', uid, 'sessions', documentID);
+  
+    await updateDoc(sessionDocRef, { sets: updatedSets });
+      console
+    setSessions(prev => prev.map(s =>
+      s.id === sessionId ? { ...s, sets: updatedSets } : s
+    ));
+  };
+  
+  
   useEffect(() => {
     if (user?.uid) fetchSessions();
   }, [user]);
 
-  return { sessions, loading, initializeSession, deleteSession, updateSession, addSet, updateSet, deleteSet };
+  return { sessions, loading, initializeSession, deleteSession, updateSession, addSet, updateSet, deleteSet, addRep, updateRep, deleteRep};
 }

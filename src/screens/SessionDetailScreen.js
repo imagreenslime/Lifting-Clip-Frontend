@@ -8,7 +8,7 @@ import { useUserSessions } from '../hooks/useUserSessions';
 
 export default function SessionDetailScreen() {
   const { selectedSessionId, setView, view, } = useNavigation();
-  const { sessions } = useUserSessions();
+  const { sessions, addSet } = useUserSessions();
   const goBack = () => {
     if (view === 'SetDetail') setView('SessionDetail');
     else if (view === 'SessionDetail') setView('Home');
@@ -40,6 +40,9 @@ export default function SessionDetailScreen() {
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => <SetCard item={item}/>}
       />
+      <TouchableOpacity onPress={() => addSet(selectedSessionId)}>
+        <Text style={{ color: '#4CAF50', fontWeight: 'bold' }}>+ Add Set</Text>
+      </TouchableOpacity>
       <BluetoothRecordingScreen />
     </View>
   );
