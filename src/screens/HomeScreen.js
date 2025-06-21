@@ -1,15 +1,13 @@
-// src/screens/HomeScreen.js
-
 import React from 'react';
-import { View, FlatList, StyleSheet, Button } from 'react-native';
+import { View, FlatList, StyleSheet, Text } from 'react-native';
 import SessionCard from '../components/SessionCard';
 import { useNavigation } from '../context/NavigationContext';
 import { useUserSessions } from '../hooks/useUserSessions';
+import { Button } from 'react-native-paper';
 
 export default function HomeScreen() {
   const { sessions, addSession } = useUserSessions();
   const { setSelectedSessionId, setView } = useNavigation();
-  console.log(sessions);
 
   const handleAddSession = async () => {
     const newSession = await addSession();
@@ -18,7 +16,7 @@ export default function HomeScreen() {
   };
 
   const renderSession = ({ item }) => (
-    <View style={styles.card}>
+    <View style={styles.cardWrapper}>
       <SessionCard item={item} />
     </View>
   );
@@ -29,17 +27,33 @@ export default function HomeScreen() {
         data={sessions}
         keyExtractor={(item) => item.id}
         renderItem={renderSession}
-        ListEmptyComponent={<View style={{ padding: 20 }}><Button title="➕ Add Session" onPress={handleAddSession} /></View>}
+        ListEmptyComponent={<Text style={styles.emptyText}>No sessions yet.</Text>}
       />
-      {sessions.length > 0 && (
-        <View style={{ padding: 20 }}>
-          <Button title="➕ Add Session" onPress={handleAddSession} />
-        </View>
-      )}
+
+      <Button mode="contained" onPress={handleAddSession} style={styles.addButton}>
+        + Add Session
+      </Button>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 16 },
+  container: {
+    flex: 1,
+    backgroundColor: '#121212',
+    padding: 16,
+  },
+  cardWrapper: {
+    marginBottom: 16,
+  },
+  addButton: {
+    marginVertical: 16,
+    backgroundColor: '#e74c3c',
+  },
+  emptyText: {
+    color: '#aaa',
+    textAlign: 'center',
+    marginTop: 40,
+    fontSize: 16,
+  },
 });

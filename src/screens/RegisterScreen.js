@@ -1,17 +1,17 @@
 // src/screens/RegisterScreen.js
 
 import React, { useState } from 'react';
-import { View, TextInput, Button, Text, Alert } from 'react-native';
+import { View, Text, TextInput, StyleSheet, Alert } from 'react-native';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
-import {auth, db} from '../../firebaseConfig'
+import { auth, db } from '../../firebaseConfig';
 import { collection, doc, setDoc, addDoc } from 'firebase/firestore';
 import { useNavigation } from '../context/NavigationContext';
 import { useUserLifts } from '../hooks/useUserLifts';
+import { Button } from 'react-native-paper';
 
 export default function RegisterScreen() {
   const { addLift } = useUserLifts();
-
-  const {setView} = useNavigation();
+  const { setView } = useNavigation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -25,44 +25,16 @@ export default function RegisterScreen() {
       setLoading(true);
       await createUserWithEmailAndPassword(auth, email, password);
       const uid = auth.currentUser.uid;
-      
+
       await setDoc(doc(db, 'users', uid), {
         createdAt: new Date().toISOString(),
         email: email,
       });
 
       const liftsRef = collection(db, 'users', uid, 'lifts');
-      await addDoc(liftsRef, { name: "squat"});
-      await addDoc(liftsRef, { name: "bench"});
-      await addDoc(liftsRef, { name: "deadlift"});
-      
-      const sessionsRef = collection(db, 'users', uid, 'sessions');
-      await addDoc(sessionsRef, {
-        name: 'Sample Session',
-        date: new Date().toISOString().split('T')[0],
-        id: 1,
-        sets: [
-          {
-            id: Date.now().toString(),
-            exercise: 'Sample Bench Press',
-            duration: '30s',
-            repdata: {
-              rep1: {
-                id: 'rep1',
-                duration: '12.5s',
-                rom: '25.4 inches',
-                tempo: '1.25s-5.5s-6.25s'
-              },
-              rep2: {
-                id: 'rep2',
-                duration: '12.5s',
-                rom: '26 inches',
-                tempo: '1.25s-5.5s-6.25s'
-              }
-            }
-          }
-        ]
-      });
+      await addDoc(liftsRef, { name: 'squat' });
+      await addDoc(liftsRef, { name: 'bench' });
+      await addDoc(liftsRef, { name: 'deadlift' });
 
       const profileRef = collection(db, 'users', uid, 'profile');
       await addDoc(profileRef, {
@@ -74,11 +46,11 @@ export default function RegisterScreen() {
           weight: '',
           age: '',
           gender: '',
-        }
+        },
       });
-      
+
       Alert.alert('Success', 'Account created!');
-      setView("Home");
+      setView('Home');
     } catch (error) {
       Alert.alert('Error', error.message);
     } finally {
@@ -87,25 +59,77 @@ export default function RegisterScreen() {
   };
 
   return (
-    <View style={{ flex: 1, justifyContent: 'center', padding: 20 }}>
-      <Text style={{ fontSize: 24, marginBottom: 20 }}>Register</Text>
+    <View style={styles.container}>
+      <Text style={styles.title}>Register</Text>
+
       <TextInput
         placeholder="Email"
+        placeholderTextColor="#777"
         value={email}
         onChangeText={setEmail}
         autoCapitalize="none"
         keyboardType="email-address"
-        style={{ borderWidth: 1, marginBottom: 10, padding: 10 }}
+        style={styles.input}
       />
+
       <TextInput
         placeholder="Password"
+        placeholderTextColor="#777"
         value={password}
         onChangeText={setPassword}
         secureTextEntry
-        style={{ borderWidth: 1, marginBottom: 20, padding: 10 }}
+        style={styles.input}
       />
-      <Button title={loading ? 'Creating...' : 'Register'} onPress={handleRegister} disabled={loading} />
-      <Button title="If not made account yet" onPress={() => setView('Login')}></Button>
+
+      <Button
+        mode="contained"
+        style={styles.registerButton}
+        onPress={handleRegister}
+        disabled={loading}
+      >
+        {loading ? 'Creating...' : 'Register'}
+      </Button>
+
+      <Button
+        mode="outlined"
+        style={styles.switchButton}
+        onPress={() => setView('Login')}
+      >
+        Already have an account? Login
+      </Button>
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    backgroundColor: '#121212',
+    padding: 20,
+  },
+  title: {
+    fontSize: 24,
+    color: '#fff',
+    fontWeight: 'bold',
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: '#555',
+    borderRadius: 6,
+    padding: 12,
+    fontSize: 16,
+    color: '#fff',
+    backgroundColor: '#1a1a1a',
+    marginBottom: 16,
+  },
+  registerButton: {
+    backgroundColor: '#e74c3c',
+    marginBottom: 16,
+  },
+  switchButton: {
+    borderColor: '#4A90E2',
+  },
+});

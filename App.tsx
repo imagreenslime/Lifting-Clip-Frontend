@@ -5,16 +5,18 @@ import { NavigationProvider } from './src/context/NavigationContext';
 import Navigation from './src/navigation/navigation';
 import SafeAreaWrapper from './src/components/SafeAreaWrapper';
 import { AuthProvider } from './src/auth/AuthProvider';
-
+import { PaperProvider } from 'react-native-paper';
 const App = () => {
 
   return (
       <AuthProvider>
-              <SafeAreaWrapper>
-                <NavigationProvider>
-                  <Navigation />
-                </NavigationProvider>
-              </SafeAreaWrapper>
+        <PaperProvider>
+          <SafeAreaWrapper>
+              <NavigationProvider>
+                <Navigation />
+              </NavigationProvider>
+            </SafeAreaWrapper>
+        </PaperProvider>
       </AuthProvider>
   );
 };

@@ -1,11 +1,10 @@
-// src/screens/SessionDetailScreen.js
-
 import React, { useState, useEffect } from 'react';
 import { View, Text, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
 import { useNavigation } from '../context/NavigationContext';
 import { useUserSessions } from '../hooks/useUserSessions';
 import SetCard from '../components/SetCard';
 import BluetoothRecordingScreen from './BluetoothRecordingScreen';
+import { IconButton, Button } from 'react-native-paper';
 
 export default function SessionDetailScreen() {
   const { selectedSessionId, view, setView } = useNavigation();
@@ -38,21 +37,27 @@ export default function SessionDetailScreen() {
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity onPress={goBack}>
-        <Text style={styles.back}>← Back</Text>
-      </TouchableOpacity>
-
-      <Text style={styles.header}>{selectedSession?.name || ''}</Text>
+      <View style={styles.headerRow}>
+        <IconButton
+          icon="arrow-left"
+          iconColor="white"
+          size={28}
+          onPress={goBack}
+          style={styles.backBtn}
+        />
+        <Text style={styles.header}>{selectedSession?.name}</Text>
+      </View>
 
       <FlatList
         data={sets}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => <SetCard item={item} />}
+        contentContainerStyle={{ paddingBottom: 100 }}
       />
 
-      <TouchableOpacity onPress={handleAddSet}>
-        <Text style={{ color: '#4CAF50', fontWeight: 'bold' }}>+ Add Set</Text>
-      </TouchableOpacity>
+      <Button mode="contained" onPress={handleAddSet} style={styles.addButton}>
+        + Add Set
+      </Button>
 
       <BluetoothRecordingScreen />
     </View>
@@ -60,7 +65,24 @@ export default function SessionDetailScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 16 },
-  header: { fontSize: 24, fontWeight: 'bold', marginBottom: 16 },
-  back: { color: '#007AFF', marginBottom: 10 },
+  container: {
+    flex: 1,
+    backgroundColor: '#121212',
+    padding: 16,
+  },
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  header: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    color: '#fff',
+    marginLeft: 8,
+  },
+  addButton: {
+    marginVertical: 16,
+    backgroundColor: '#e74c3c',
+  },
 });

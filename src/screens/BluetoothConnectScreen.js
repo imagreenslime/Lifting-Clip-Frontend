@@ -1,19 +1,18 @@
 // src/screens/BluetoothConnectScreen.js
+
 import React, { useEffect, useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, ScrollView, StyleSheet } from 'react-native';
 import BluetoothService from '../services/BluetoothService';
 import { useNavigation } from '../context/NavigationContext';
+import { Button } from 'react-native-paper';
 
-export default function BluetoothScreen({}) {
+export default function BluetoothConnectScreen() {
+  const { setConnectedDevice, setView, connectedDevice } = useNavigation();
 
-  const {
-    setConnectedDevice, setView, connectedDevice
-  } = useNavigation()
-
-  const onConnect=((device) => {
+  const onConnect = (device) => {
     setConnectedDevice(device);
     setView('BluetoothRecording');
-  })
+  };
 
   const [foundDevices, setFoundDevices] = useState([]);
 
@@ -41,36 +40,46 @@ export default function BluetoothScreen({}) {
     <View style={styles.container}>
       <Text style={styles.title}>🔵 Bluetooth Manager</Text>
 
-      <TouchableOpacity style={styles.scanButton} onPress={() => BluetoothService.startScan()}>
-        <Text style={styles.buttonText}>Scan for Devices</Text>
-      </TouchableOpacity>
+      <Button
+        mode="contained"
+        style={styles.scanButton}
+        onPress={() => BluetoothService.startScan()}
+      >
+        Scan for Devices
+      </Button>
 
       <ScrollView style={styles.deviceList}>
         {foundDevices.length === 0 ? (
           <Text style={styles.noDeviceText}>No devices found.</Text>
         ) : (
           foundDevices.map((device) => (
-            <TouchableOpacity
+            <Button
               key={device.id}
+              mode="outlined"
               style={styles.deviceButton}
+              textColor="#fff"
               onPress={async () => {
                 await BluetoothService.connectDevice(device);
                 onConnect(device);
               }}
             >
-              <Text style={styles.deviceName}>{device.name || 'Unnamed Device'}</Text>
-              <Text style={styles.deviceId}>{device.id}</Text>
-            </TouchableOpacity>
+              {device.name || 'Unnamed Device'}\n{device.id}
+            </Button>
           ))
         )}
       </ScrollView>
 
-      <TouchableOpacity style={styles.disconnectButton} onPress={handleDisconnect}>
-        <Text style={styles.buttonText}>Disconnect</Text>
-      </TouchableOpacity>
+      <Button
+        mode="contained"
+        style={styles.disconnectButton}
+        onPress={handleDisconnect}
+      >
+        Disconnect
+      </Button>
 
       <Text style={styles.connectedLabel}>
-        Connected Device: <Text style={styles.connectedDevice}>{connectedDevice?.name || 'None'}</Text>
+        Connected Device:{' '}
+        <Text style={styles.connectedDevice}>{connectedDevice?.name || 'None'}</Text>
       </Text>
     </View>
   );
@@ -78,51 +87,33 @@ export default function BluetoothScreen({}) {
 
 const styles = StyleSheet.create({
   container: {
-    padding: 20,
     flex: 1,
-    backgroundColor: '#fff',
+    padding: 20,
+    backgroundColor: '#121212',
   },
   title: {
     fontSize: 22,
     fontWeight: 'bold',
+    color: '#fff',
     marginBottom: 16,
     textAlign: 'center',
   },
   scanButton: {
     backgroundColor: '#4A90E2',
-    padding: 12,
-    borderRadius: 8,
-    alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: 16,
   },
   disconnectButton: {
     backgroundColor: '#D9534F',
-    padding: 12,
-    borderRadius: 8,
-    alignItems: 'center',
     marginTop: 12,
   },
-  buttonText: {
-    color: '#fff',
-    fontSize: 16,
-  },
   deviceList: {
-    marginTop: 10,
-    marginBottom: 20,
+    flex: 1,
+    marginBottom: 16,
   },
   deviceButton: {
-    padding: 12,
-    backgroundColor: '#F0F0F0',
-    borderRadius: 6,
-    marginBottom: 8,
-  },
-  deviceName: {
-    fontSize: 16,
-    fontWeight: '500',
-  },
-  deviceId: {
-    fontSize: 12,
-    color: '#888',
+    borderColor: '#4A90E2',
+    borderRadius: 8,
+    marginBottom: 10,
   },
   noDeviceText: {
     textAlign: 'center',
@@ -133,6 +124,7 @@ const styles = StyleSheet.create({
   connectedLabel: {
     marginTop: 16,
     fontSize: 14,
+    color: '#aaa',
     textAlign: 'center',
   },
   connectedDevice: {

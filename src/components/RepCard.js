@@ -1,11 +1,14 @@
+// src/components/RepCard.js
+
 import React from 'react';
-import { View, Text, TextInput, StyleSheet, TouchableOpacity} from 'react-native';
+import { View, Text, TextInput, StyleSheet, TouchableOpacity } from 'react-native';
 import { useNavigation } from '../context/NavigationContext';
 import { useUserSessions } from '../hooks/useUserSessions';
+import { IconButton } from 'react-native-paper';
 
 export default function RepCard({ item, index }) {
-  const { selectedSet, selectedSessionId, setView} = useNavigation();
-  const { updateRep, deleteRep, sessions } = useUserSessions();
+  const { selectedSet, selectedSessionId, setView } = useNavigation();
+  const { updateRep, deleteRep } = useUserSessions();
 
   const { id: repId, duration, rom, tempo, rpe } = item;
 
@@ -13,98 +16,131 @@ export default function RepCard({ item, index }) {
     const newRpe = parseInt(value, 10) || '';
     updateRep(selectedSessionId, selectedSet.id, repId, { rpe: newRpe });
   };
+
   const handleDeleteRep = () => {
     deleteRep(selectedSessionId, selectedSet.id, repId);
-    setView("Home");
+    setView('Home');
     setTimeout(() => setView('SetDetail'), 100);
-  }
+  };
+
   return (
     <View style={styles.repCard}>
-      <Text style={styles.repHeader}>Rep {index + 1}</Text>
-
-      <View style={styles.rpeRow}>
-        <Text style={styles.rpeLabel}>Duration:</Text>
-        <TextInput
-          style={styles.repInput}
-          defaultValue={duration}
-          placeholder="0.00s"
-          onEndEditing={(e) =>
-            updateRep(selectedSessionId, selectedSet.id, repId, {
-              duration: e.nativeEvent.text,
-            })
-          }
+      <View style={styles.headerRow}>
+        <Text style={styles.repHeader}>Rep {index + 1}</Text>
+        <IconButton
+          icon="trash-can"
+          iconColor="#e74c3c"
+          size={20}
+          onPress={handleDeleteRep}
         />
       </View>
 
-      <View style={styles.rpeRow}>
-        <Text style={styles.rpeLabel}>ROM:</Text>
-        <TextInput
-          style={styles.repInput}
-          defaultValue={rom}
-          placeholder="ROM"
-          onEndEditing={(e) =>
-            updateRep(selectedSessionId, selectedSet.id, repId, {
-              rom: e.nativeEvent.text,
-            })
-          }
-        />
-      </View>
+      <View style={styles.inputRow}>
+        <View style={styles.inputGroup}>
+          <Text style={styles.label}>Duration</Text>
+          <TextInput
+            style={styles.input}
+            defaultValue={duration}
+            placeholder="0.00s"
+            placeholderTextColor="#777"
+            onEndEditing={(e) =>
+              updateRep(selectedSessionId, selectedSet.id, repId, {
+                duration: e.nativeEvent.text,
+              })
+            }
+          />
+        </View>
 
-      <View style={styles.rpeRow}>
-        <Text style={styles.rpeLabel}>Tempo:</Text>
-        <TextInput
-          style={styles.repInput}
-          defaultValue={tempo}
-          placeholder="Tempo"
-          onEndEditing={(e) =>
-            updateRep(selectedSessionId, selectedSet.id, repId, {
-              tempo: e.nativeEvent.text,
-            })
-          }
-        />
-      </View>
+        <View style={styles.inputGroup}>
+          <Text style={styles.label}>ROM</Text>
+          <TextInput
+            style={styles.input}
+            defaultValue={rom}
+            placeholder="ROM"
+            placeholderTextColor="#777"
+            onEndEditing={(e) =>
+              updateRep(selectedSessionId, selectedSet.id, repId, {
+                rom: e.nativeEvent.text,
+              })
+            }
+          />
+        </View>
 
-      <View style={styles.rpeRow}>
-        <Text style={styles.rpeLabel}>RPE:</Text>
-        <TextInput
-          style={styles.repInput}
-          keyboardType="numeric"
-          defaultValue={rpe?.toString() || ''}
-          placeholder="RPE"
-          onEndEditing={(e) => handleRpeChange(e.nativeEvent.text)}
-        />
+        <View style={styles.inputGroup}>
+          <Text style={styles.label}>Tempo</Text>
+          <TextInput
+            style={styles.input}
+            defaultValue={tempo}
+            placeholder="Tempo"
+            placeholderTextColor="#777"
+            onEndEditing={(e) =>
+              updateRep(selectedSessionId, selectedSet.id, repId, {
+                tempo: e.nativeEvent.text,
+              })
+            }
+          />
+        </View>
+
+        <View style={styles.inputGroup}>
+          <Text style={styles.label}>RPE</Text>
+          <TextInput
+            style={styles.input}
+            keyboardType="numeric"
+            defaultValue={rpe?.toString() || ''}
+            placeholder="RPE"
+            placeholderTextColor="#777"
+            onEndEditing={(e) => handleRpeChange(e.nativeEvent.text)}
+          />
+        </View>
       </View>
-    <TouchableOpacity
-    style={styles.deleteButton}
-    onPress={handleDeleteRep}
-    >
-    <Text style={styles.deleteButtonText}>🗑 Delete Rep</Text>
-    </TouchableOpacity>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   repCard: {
-    backgroundColor: '#f0f0f0',
-    padding: 12,
-    borderRadius: 6,
-    marginBottom: 10,
+    backgroundColor: '#2a2a2a',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 12,
+    shadowColor: '#000',
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 4,
   },
-  repHeader: { fontWeight: 'bold', marginBottom: 4 },
-  rpeRow: {
+  headerRow: {
     flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    marginTop: 8,
+    marginBottom: 12,
   },
-  rpeLabel: { fontWeight: '500', marginRight: 8 },
-  repInput: {
+  repHeader: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#fff',
+  },
+  inputRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+  },
+  inputGroup: {
+    width: '48%',
+    marginBottom: 12,
+  },
+  label: {
+    color: '#aaa',
+    marginBottom: 4,
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  input: {
     borderWidth: 1,
-    borderColor: '#aaa',
-    borderRadius: 4,
-    padding: 4,
-    width: 50,
+    borderColor: '#555',
+    borderRadius: 6,
+    padding: 8,
     textAlign: 'center',
-    backgroundColor: '#fff',
+    color: '#fff',
+    backgroundColor: '#1a1a1a',
   },
 });

@@ -1,70 +1,89 @@
-// src/screens/BluetoothRecordScreen.js
+// src/screens/BluetoothRecordingScreen.js
+
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 import BluetoothService from '../services/BluetoothService';
 import { useNavigation } from '../context/NavigationContext';
 import { useUserSessions } from '../hooks/useUserSessions';
+import { Button } from 'react-native-paper';
 
-export default function BluetoothRecordingScreen({ }) {
+export default function BluetoothRecordingScreen() {
   const { addSet } = useUserSessions();
-
-  const {
-    connectedDevice, selectedSessionId
-  } = useNavigation();
+  const { connectedDevice, selectedSessionId } = useNavigation();
 
   const [processedReps, setProcessedReps] = useState(new Set());
+
   const onDisconnect = () => {
-    
+    // handle disconnect logic if needed
   };
 
   BluetoothService.onSetUpdate((summaries) => {
     const latestSetId = summaries[summaries.length - 1].set;
-  
-    const repsInSet = summaries.filter(s => 
-      s.set === latestSetId && !processedReps.has(s.id)
+
+    const repsInSet = summaries.filter(
+      (s) => s.set === latestSetId && !processedReps.has(s.id)
     );
-  
+
     if (repsInSet.length === 0) return;
-  
+
     const convertedSet = {
       id: Date.now().toString(),
       exercise: '(Enter Exercise)',
       reps: repsInSet.length,
       duration: `${repsInSet.reduce((sum, r) => sum + r.dur, 0).toFixed(2)}s`,
-      repData: repsInSet.map(rep => ({
+      repData: repsInSet.map((rep) => ({
         id: rep.id.toString(),
         duration: `${rep.dur.toFixed(2)}s`,
         rom: `${rep.rom.toFixed(2)}`,
         tempo: rep.tempo.join('-'),
       })),
     };
-  
+
     addSet(selectedSessionId, convertedSet);
 
-  
-    setProcessedReps(prev => {
+    setProcessedReps((prev) => {
       const updated = new Set(prev);
-      repsInSet.forEach(r => updated.add(r.id));
+      repsInSet.forEach((r) => updated.add(r.id));
       return updated;
     });
   });
 
   return (
     <View style={styles.container}>
-      <Text style={styles.sectionTitle}>📊 Set Recording</Text>
-      <Text style={styles.label}>Connected Device: <Text style={styles.device}>{connectedDevice?.name || 'None'}</Text></Text>
-      <Text style={styles.label}>Current Rep Count: <Text style={styles.count}>{BluetoothService.getRepCount()}</Text></Text>
+      <Text style={styles.sectionTitle}>📡 Bluetooth Set Recording</Text>
+
+      <Text style={styles.label}>
+        Device: <Text style={styles.value}>{connectedDevice?.name || 'None'}</Text>
+      </Text>
+
+      <Text style={styles.label}>
+        Reps: <Text style={styles.value}>{BluetoothService.getRepCount()}</Text>
+      </Text>
 
       <View style={styles.buttonGroup}>
-        <TouchableOpacity style={styles.actionButton} onPress={() => BluetoothService.sendCommand('START_RECORDING')}>
-          <Text style={styles.buttonText}>Start</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={[styles.actionButton, styles.stopButton]} onPress={() => BluetoothService.sendCommand('STOP_RECORDING')}>
-          <Text style={styles.buttonText}>Stop</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={[styles.actionButton, styles.disconnectButton]} onPress={onDisconnect}>
-          <Text style={styles.buttonText}>Disconnect</Text>
-        </TouchableOpacity>
+        <Button
+          mode="contained"
+          style={[styles.button, styles.startButton]}
+          onPress={() => BluetoothService.sendCommand('START_RECORDING')}
+        >
+          Start
+        </Button>
+
+        <Button
+          mode="contained"
+          style={[styles.button, styles.stopButton]}
+          onPress={() => BluetoothService.sendCommand('STOP_RECORDING')}
+        >
+          Stop
+        </Button>
+
+        <Button
+          mode="contained"
+          style={[styles.button, styles.disconnectButton]}
+          onPress={onDisconnect}
+        >
+          Disconnect
+        </Button>
       </View>
     </View>
   );
@@ -74,49 +93,47 @@ const styles = StyleSheet.create({
   container: {
     marginTop: 16,
     padding: 16,
-    backgroundColor: '#f4f6f8',
-    borderRadius: 10,
+    backgroundColor: '#2a2a2a',
+    borderRadius: 12,
+    shadowColor: '#000',
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 4,
   },
   sectionTitle: {
     fontSize: 18,
-    fontWeight: '600',
-    marginBottom: 12,
+    fontWeight: 'bold',
+    color: '#fff',
     textAlign: 'center',
+    marginBottom: 12,
   },
   label: {
     fontSize: 15,
+    color: '#aaa',
     marginBottom: 4,
   },
-  device: {
-    fontWeight: '500',
-    color: '#4A90E2',
-  },
-  count: {
+  value: {
     fontWeight: 'bold',
-    color: '#333',
+    color: '#fff',
   },
   buttonGroup: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginTop: 12,
+    marginTop: 16,
   },
-  actionButton: {
+  button: {
     flex: 1,
-    backgroundColor: '#4CAF50',
-    padding: 10,
-    marginHorizontal: 5,
+    marginHorizontal: 4,
+    paddingVertical: 6,
     borderRadius: 6,
-    alignItems: 'center',
+  },
+  startButton: {
+    backgroundColor: '#4CAF50',
   },
   stopButton: {
     backgroundColor: '#FFA500',
   },
   disconnectButton: {
     backgroundColor: '#D9534F',
-  },
-  buttonText: {
-    color: '#fff',
-    fontSize: 15,
-    fontWeight: '500',
   },
 });

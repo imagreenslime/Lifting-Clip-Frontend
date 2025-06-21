@@ -1,8 +1,10 @@
 // src/screens/LiftsScreen.js
+
 import React, { useState, useEffect } from 'react';
-import { View, Text, FlatList, TouchableOpacity, TextInput, StyleSheet } from 'react-native';
+import { View, Text, FlatList, TextInput, StyleSheet } from 'react-native';
 import { useUserLifts } from '../hooks/useUserLifts';
 import { useUserSessions } from '../hooks/useUserSessions';
+import { Button, IconButton, List } from 'react-native-paper';
 
 export default function LiftsScreen() {
   const { lifts, addLift, deleteLift } = useUserLifts();
@@ -20,18 +22,17 @@ export default function LiftsScreen() {
   const loadSets = async () => {
     const sets = await fetchAllSetsAcrossSessions();
     const setsWithReps = [];
-  
+
     for (const set of sets) {
-      const reps = await fetchReps(set.sessionId, set.id); // wait for reps
+      const reps = await fetchReps(set.sessionId, set.id);
       setsWithReps.push({
         ...set,
-        reps, // now you have all repdata here
+        reps,
       });
     }
-  
+
     setAllSets(setsWithReps);
   };
-  
 
   const handleAddLift = async () => {
     if (!newLiftName.trim()) return;
@@ -40,47 +41,55 @@ export default function LiftsScreen() {
   };
 
   const getAllSetsForLift = (liftType) => {
-    return allSets.filter(set => 
-      set.liftType?.toLowerCase() === liftType.toLowerCase()
+    return allSets.filter(
+      (set) => set.liftType?.toLowerCase() === liftType.toLowerCase()
     );
   };
 
   const renderLift = ({ item }) => {
     const sets = getAllSetsForLift(item.name);
-    
+
     return (
-      <View style={styles.liftCard}>
-        <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 }}>
-          <Text style={styles.liftTitle}>{item.name.toUpperCase()}</Text>
-          <TouchableOpacity onPress={() => deleteLift(item.id)}>
-            <Text style={styles.btnDelete}>🗑</Text>
-          </TouchableOpacity>
-        </View>
+      <List.Accordion
+        title={item.name.toUpperCase()}
+        titleStyle={styles.accordionTitle}
+        style={styles.liftCard}
+        theme={{ colors: { background: '#222222' } }}
+        right={(props) => (
+          <IconButton
+            icon="trash-can"
+            iconColor="#e74c3c"
+            size={18}
+            onPress={() => deleteLift(item.id)}
+          />
+        )}
+      >
         {sets.length === 0 ? (
           <Text style={styles.noData}>No sets recorded for this lift.</Text>
         ) : (
           sets.map((set, index) => (
             <View key={index} style={styles.setRow}>
-              <Text>Session: {set.sessionName}</Text>
-              <Text>Exercise: {set.exercise}</Text>
-              <Text>
+              <Text style={styles.setText}>Session: {set.sessionName}</Text>
+              <Text style={styles.setText}>Exercise: {set.exercise}</Text>
+              <Text style={styles.setText}>
                 Reps: {set.repsCount} | RPE: {set.totalRpe ?? ''}
               </Text>
-                
-              <Text>--------</Text>
+
               {set.reps && set.reps.length > 0 ? (
                 set.reps.map((rep, idx) => (
-                    <View key={idx} style={{ paddingLeft: 10 }}>
-                    <Text>Rep {idx + 1}: RPE {rep.rpe}, ROM {rep.rom}, Tempo {rep.tempo}</Text>
-                    </View>
+                  <View key={idx} style={styles.repRow}>
+                    <Text style={styles.repText}>
+                      Rep {idx + 1}: RPE {rep.rpe}, ROM {rep.rom}, Tempo {rep.tempo}
+                    </Text>
+                  </View>
                 ))
-                ) : (
-                <Text style={{ paddingLeft: 10 }}>No reps</Text>
-                )}
+              ) : (
+                <Text style={styles.repText}>No reps</Text>
+              )}
             </View>
           ))
         )}
-      </View>
+      </List.Accordion>
     );
   };
 
@@ -94,50 +103,84 @@ export default function LiftsScreen() {
           value={newLiftName}
           onChangeText={setNewLiftName}
           placeholder="New Lift Name"
+          placeholderTextColor="#777"
         />
-        <TouchableOpacity style={styles.addButton} onPress={handleAddLift}>
-          <Text style={{ color: '#fff' }}>Add</Text>
-        </TouchableOpacity>
+        <Button mode="contained" style={styles.addButton} onPress={handleAddLift}>
+          Add
+        </Button>
       </View>
 
       <FlatList
         data={lifts}
         keyExtractor={(item) => item.id}
         renderItem={renderLift}
+        contentContainerStyle={{ paddingBottom: 16 }}
       />
     </View>
   );
 }
 
-
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 16 },
-  header: { fontSize: 24, fontWeight: 'bold', marginBottom: 12 },
-  addRow: { flexDirection: 'row', marginBottom: 16 },
+  container: {
+    flex: 1,
+    backgroundColor: '#121212',
+    padding: 16,
+  },
+  header: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#fff',
+    marginBottom: 12,
+  },
+  addRow: {
+    flexDirection: 'row',
+    marginBottom: 16,
+    alignItems: 'center',
+  },
   input: {
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: '#555',
     borderRadius: 6,
-    padding: 8,
+    padding: 10,
     flex: 1,
     marginRight: 8,
+    color: '#fff',
+    backgroundColor: '#1a1a1a',
   },
   addButton: {
     backgroundColor: '#4CAF50',
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    borderRadius: 6,
-    justifyContent: 'center',
   },
   liftCard: {
-    backgroundColor: '#eee',
-    padding: 12,
-    borderRadius: 8,
-    marginBottom: 12,
+    backgroundColor: '#222222',
+    borderRadius: 6,
+    marginBottom: 6,
   },
-  liftTitle: { fontWeight: 'bold', fontSize: 16 },
-  btnDelete: { fontSize: 16 },
-  noData: { color: '#888', fontStyle: 'italic' },
-  setRow: { marginTop: 8 },
+  accordionTitle: {
+    color: '#fff',
+    fontSize: 15,
+    fontWeight: 'bold',
+  },
+  noData: {
+    color: '#888',
+    fontStyle: 'italic',
+    padding: 6,
+  },
+  setRow: {
+    padding: 6,
+    borderTopWidth: 1,
+    borderTopColor: '#333',
+  },
+  setText: {
+    color: '#ccc',
+    fontSize: 12,
+    marginBottom: 2,
+  },
+  repRow: {
+    paddingLeft: 6,
+    marginBottom: 1,
+  },
+  repText: {
+    color: '#aaa',
+    fontSize: 11,
+  },
 });
-

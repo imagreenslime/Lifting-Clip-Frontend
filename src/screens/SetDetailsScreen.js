@@ -1,10 +1,9 @@
-// src/screens/SetDetailScreen.js
-
 import React, { useState, useEffect } from 'react';
-import { View, Text, FlatList, TouchableOpacity, TextInput, StyleSheet, Alert } from 'react-native';
+import { View, Text, FlatList, StyleSheet, Alert, TextInput } from 'react-native';
 import { useNavigation } from '../context/NavigationContext';
 import { useUserSessions } from '../hooks/useUserSessions';
 import RepCard from '../components/RepCard';
+import { IconButton, Button } from 'react-native-paper';
 
 export default function SetDetailScreen() {
   const { selectedSet, selectedSessionId, view, setView } = useNavigation();
@@ -47,14 +46,10 @@ export default function SetDetailScreen() {
 
   const saveRepRpe = async (newReps, rpeToSave) => {
     try {
-      console.log(newReps);
       await updateSet(selectedSessionId, selectedSet.id, { totalRpe: rpeToSave });
-
       for (const rep of newReps) {
         await updateRep(selectedSessionId, selectedSet.id, rep.id, { rpe: rep.rpe });
       }
-
-      console.log('Updated total Rpe');
     } catch (err) {
       console.error('Failed to save RPE:', err);
       Alert.alert('Error', 'Failed to save RPE');
@@ -66,25 +61,27 @@ export default function SetDetailScreen() {
     await loadReps();
   };
 
-  const handleReloadReps = async () => {
-    await loadReps();
-  };
-
   const renderRepRow = ({ item, index }) => (
     <RepCard
       item={item}
       index={index}
-      reloadReps={handleReloadReps}
+      reloadReps={loadReps}
     />
   );
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity onPress={goBack}>
-        <Text style={styles.back}>← Back</Text>
-      </TouchableOpacity>
+      <View style={styles.headerRow}>
+        <IconButton
+          icon="arrow-left"
+          iconColor="white"
+          size={28}
+          onPress={goBack}
+          style={styles.backBtn}
+        />
+        <Text style={styles.header}>{selectedSet?.exercise || 'Set'}</Text>
+      </View>
 
-      <Text style={styles.title}>{selectedSet?.exercise}</Text>
       <Text style={styles.summary}>Total Reps: {reps.length}</Text>
 
       <View style={styles.totalRpeRow}>
@@ -95,6 +92,7 @@ export default function SetDetailScreen() {
           value={totalRpe}
           onChangeText={handleTotalRpeChange}
           placeholder="1-10"
+          placeholderTextColor="#777"
         />
       </View>
 
@@ -102,33 +100,59 @@ export default function SetDetailScreen() {
         data={reps}
         keyExtractor={(item) => item.id}
         renderItem={renderRepRow}
+        contentContainerStyle={{ paddingBottom: 100 }}
       />
 
-      <TouchableOpacity onPress={handleAddRep}>
-        <Text style={{ color: '#4CAF50', fontWeight: 'bold' }}>+ Add Rep</Text>
-      </TouchableOpacity>
+      <Button mode="contained" onPress={handleAddRep} style={styles.addButton}>
+        + Add Rep
+      </Button>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 16 },
-  title: { fontSize: 22, fontWeight: 'bold', marginBottom: 8 },
-  back: { color: '#007AFF', marginBottom: 10 },
-  summary: { marginBottom: 16 },
-  totalRpeRow: {
+  container: {
+    flex: 1,
+    backgroundColor: '#121212',
+    padding: 16,
+  },
+  headerRow: {
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 12,
   },
-  rpeLabel: { fontWeight: '500', marginRight: 8 },
+  header: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    color: '#fff',
+    marginLeft: 8,
+  },
+  summary: {
+    color: '#aaa',
+    marginBottom: 12,
+  },
+  totalRpeRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  rpeLabel: {
+    fontWeight: '500',
+    color: '#fff',
+    marginRight: 8,
+  },
   totalRpeInput: {
     borderWidth: 1,
-    borderColor: '#aaa',
-    borderRadius: 4,
-    padding: 4,
+    borderColor: '#555',
+    borderRadius: 6,
+    padding: 6,
     width: 60,
     textAlign: 'center',
-    backgroundColor: '#fff',
+    color: '#fff',
+    backgroundColor: '#1a1a1a',
+  },
+  addButton: {
+    marginVertical: 16,
+    backgroundColor: '#e74c3c',
   },
 });

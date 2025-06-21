@@ -1,15 +1,16 @@
 // src/components/SetCard.js
-
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Alert, Modal, TextInput, Pressable } from 'react-native';
 import { useNavigation } from '../context/NavigationContext';
 import { useUserSessions } from '../hooks/useUserSessions';
 import { useUserLifts } from '../hooks/useUserLifts';
+import { Menu, IconButton } from 'react-native-paper';
 
 export default function SetCard({ item }) {
   const { deleteSet, updateSet } = useUserSessions();
   const { setSelectedSet, setView, selectedSessionId } = useNavigation();
   const { lifts } = useUserLifts();
+  const [menuVisible, setMenuVisible] = useState(false);
   const [showRenameModal, setShowRenameModal] = useState(false);
   const [newLiftType, setNewLiftType] = useState(item.liftType || '');
   const [newExerciseName, setNewExerciseName] = useState(item.exercise || '');
@@ -40,16 +41,14 @@ export default function SetCard({ item }) {
   };
 
   const handleRename = async () => {
-    if (!newLiftType || !newExerciseName.trim()) {
-      Alert.alert('Missing fields', 'Please select a lift type and enter a name.');
-      return;
-    }
+    if (!newLiftType || !newExerciseName.trim()) return;
     try {
       await updateSet(selectedSessionId, item.id, {
         liftType: newLiftType,
         exercise: newExerciseName.trim(),
       });
       setShowRenameModal(false);
+      setSelectedSet(item);
       setView('');
       setTimeout(() => setView('SessionDetail'), 10);
     } catch (err) {
@@ -58,27 +57,42 @@ export default function SetCard({ item }) {
     }
   };
 
-
   const repValues = item.repdata ? Object.values(item.repdata) : [];
 
   return (
-    <View style={styles.setCard}>
-      <TouchableOpacity onPress={goToSet} style={{ flex: 1 }}>
+    <View style={styles.card}>
+      <TouchableOpacity style={styles.cardContent} onPress={goToSet}>
         <Text style={styles.exercise}>
           {item.exercise} {item.liftType ? `(${item.liftType})` : ''}
         </Text>
-        <Text style={styles.info}>
+        <Text style={styles.details}>
           Reps: {repValues.length} | Duration: {item.duration} | RPE: {item.totalRpe}
         </Text>
       </TouchableOpacity>
 
-      <TouchableOpacity onPress={() => setShowRenameModal(true)}>
-        <Text style={styles.btn}>✏️</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity onPress={handleDelete}>
-        <Text style={styles.btn}>🗑</Text>
-      </TouchableOpacity>
+      <Menu
+        visible={menuVisible}
+        onDismiss={() => setMenuVisible(false)}
+        anchor={<IconButton icon="dots-vertical" iconColor="white" size={24} onPress={() => setMenuVisible(true)} />}
+        contentStyle={{ backgroundColor: '#333' }}
+      >
+        <Menu.Item
+          onPress={() => {
+            setShowRenameModal(true);
+            setMenuVisible(false);
+          }}
+          title="Rename"
+          titleStyle={{ color: 'white' }}
+        />
+        <Menu.Item
+          onPress={() => {
+            handleDelete();
+            setMenuVisible(false);
+          }}
+          title="Delete"
+          titleStyle={{ color: '#e74c3c' }}
+        />
+      </Menu>
 
       {/* Rename Modal */}
       <Modal visible={showRenameModal} transparent animationType="fade">
@@ -88,20 +102,13 @@ export default function SetCard({ item }) {
 
             <Text style={styles.modalLabel}>Select Lift Type:</Text>
             <View style={styles.liftTypeRow}>
-              {lifts.map(lift => (
+              {lifts.map((lift) => (
                 <Pressable
                   key={lift.id}
-                  style={[
-                    styles.liftTypeButton,
-                    newLiftType === lift.name && styles.liftTypeSelected,
-                  ]}
+                  style={[styles.liftTypeButton, newLiftType === lift.name && styles.liftTypeSelected]}
                   onPress={() => setNewLiftType(lift.name)}
                 >
-                  <Text
-                    style={{
-                      color: newLiftType === lift.name ? '#fff' : '#000',
-                    }}
-                  >
+                  <Text style={{ color: newLiftType === lift.name ? '#fff' : '#000' }}>
                     {lift.name.toUpperCase()}
                   </Text>
                 </Pressable>
@@ -114,6 +121,7 @@ export default function SetCard({ item }) {
               value={newExerciseName}
               onChangeText={setNewExerciseName}
               placeholder="Enter nickname"
+              placeholderTextColor="#777"
             />
 
             <View style={styles.modalActions}>
@@ -135,22 +143,32 @@ export default function SetCard({ item }) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 16 },
-  header: { fontSize: 24, fontWeight: 'bold', marginBottom: 16 },
-  back: { color: '#007AFF', marginBottom: 10 },
-  setCard: {
-    backgroundColor: '#ddd',
-    padding: 12,
-    borderRadius: 6,
-    marginBottom: 10,
+  card: {
+    backgroundColor: '#2a2a2a',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 12,
     flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    gap: 10,
+    shadowColor: '#000',
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 4,
+    position: 'relative',
   },
-  exercise: { fontWeight: 'bold' },
-  info: { marginTop: 4 },
-  btn: { fontSize: 16 },
-
+  cardContent: {
+    flex: 1,
+  },
+  exercise: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#fff',
+  },
+  details: {
+    color: '#aaa',
+    marginTop: 4,
+  },
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.5)',
@@ -158,7 +176,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   modalContent: {
-    backgroundColor: '#fff',
+    backgroundColor: '#2a2a2a',
     padding: 24,
     borderRadius: 8,
     width: '80%',
@@ -166,6 +184,7 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: 18,
     fontWeight: '600',
+    color: '#fff',
     marginBottom: 16,
     textAlign: 'center',
   },
@@ -173,40 +192,44 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     marginBottom: 6,
     marginTop: 10,
+    color: '#fff',
   },
   liftTypeRow: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     justifyContent: 'space-between',
     marginBottom: 12,
   },
   liftTypeButton: {
-    flex: 1,
     padding: 8,
-    marginHorizontal: 4,
+    margin: 4,
     borderRadius: 4,
     borderWidth: 1,
     borderColor: '#888',
     alignItems: 'center',
+    backgroundColor: '#fff',
   },
   liftTypeSelected: {
-    backgroundColor: '#4CAF50',
-    borderColor: '#4CAF50',
+    backgroundColor: '#e74c3c',
+    borderColor: '#e74c3c',
   },
   modalInput: {
     borderWidth: 1,
-    borderColor: '#aaa',
-    borderRadius: 4,
-    padding: 8,
-    marginBottom: 12,
+    borderColor: '#555',
+    borderRadius: 6,
+    padding: 10,
+    color: '#fff',
+    backgroundColor: '#1a1a1a',
+    marginBottom: 16,
   },
   modalActions: {
     flexDirection: 'row',
     justifyContent: 'space-between',
   },
   modalButton: {
-    backgroundColor: '#4CAF50',
+    backgroundColor: '#e74c3c',
     padding: 10,
-    borderRadius: 4,
+    borderRadius: 6,
     flex: 1,
     marginHorizontal: 4,
     alignItems: 'center',

@@ -1,12 +1,25 @@
+// src/components/SafeAreaWrapper.js
+
 import React from 'react';
 import { View, Platform, StatusBar, StyleSheet } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function SafeAreaWrapper({ children }) {
-  const topPadding = Platform.OS === 'android' ? StatusBar.currentHeight || 24 : 44;
-  const bottomPadding = Platform.OS === 'android' ? 16 : 34; // enough for gesture nav / home bar
+  const insets = useSafeAreaInsets();
 
   return (
-    <View style={[styles.wrapper, { paddingTop: topPadding, paddingBottom: bottomPadding }]}>
+    <View
+      style={[
+        styles.wrapper,
+        {
+          paddingTop:
+            Platform.OS === 'android'
+              ? StatusBar.currentHeight || insets.top || 24
+              : insets.top || 44,
+          paddingBottom: insets.bottom || 16,
+        },
+      ]}
+    >
       {children}
     </View>
   );
@@ -15,6 +28,7 @@ export default function SafeAreaWrapper({ children }) {
 const styles = StyleSheet.create({
   wrapper: {
     flex: 1,
-    backgroundColor: 'white', // optional: match your theme
+    backgroundColor: '#121212', // match your app dark theme
+    paddingHorizontal: 16,      // nice side padding for all screens
   },
 });
