@@ -1,48 +1,59 @@
 // src/screens/SessionDetailScreen.js
-import React from 'react';
-import { View, Text, FlatList, StyleSheet, TouchableOpacity, Alert } from 'react-native';
-import BluetoothRecordingScreen from './BluetoothRecordingScreen';
-import SetCard from '../components/SetCard';
+
+import React, { useState, useEffect } from 'react';
+import { View, Text, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
 import { useNavigation } from '../context/NavigationContext';
 import { useUserSessions } from '../hooks/useUserSessions';
+import SetCard from '../components/SetCard';
+import BluetoothRecordingScreen from './BluetoothRecordingScreen';
 
 export default function SessionDetailScreen() {
-  const { selectedSessionId, setView, view, } = useNavigation();
-  const { sessions, addSet } = useUserSessions();
+  const { selectedSessionId, view, setView } = useNavigation();
+  const { sessions, fetchSets, addSet } = useUserSessions();
+
+  const [sets, setSets] = useState([]);
+
+  const selectedSession = sessions.find(s => s.id === selectedSessionId);
+
   const goBack = () => {
     if (view === 'SetDetail') setView('SessionDetail');
     else if (view === 'SessionDetail') setView('Home');
   };
-  const selectedSession = sessions.find(s => s.id === selectedSessionId);
 
-  if (!selectedSession) {
-    return (
-      <View style={styles.container}>
-        <Text style={styles.header}></Text>
-      </View>
-    );
-  }
+  const loadSets = async () => {
+    if (selectedSessionId) {
+      const newSets = await fetchSets(selectedSessionId);
+      setSets(newSets);
+    }
+  };
 
-  const setsArray = Array.isArray(selectedSession.sets)
-    ? selectedSession.sets
-    : Object.values(selectedSession.sets || {});
+  useEffect(() => {
+    loadSets();
+  }, [selectedSessionId]);
 
+  const handleAddSet = async () => {
+    await addSet(selectedSessionId);
+    await loadSets();
+  };
 
   return (
     <View style={styles.container}>
-      {console.log(selectedSessionId)}
       <TouchableOpacity onPress={goBack}>
         <Text style={styles.back}>← Back</Text>
       </TouchableOpacity>
-      <Text style={styles.header}>{selectedSession.name}</Text>
+
+      <Text style={styles.header}>{selectedSession?.name || ''}</Text>
+
       <FlatList
-        data={setsArray}
+        data={sets}
         keyExtractor={(item) => item.id}
-        renderItem={({ item }) => <SetCard item={item}/>}
+        renderItem={({ item }) => <SetCard item={item} />}
       />
-      <TouchableOpacity onPress={() => addSet(selectedSessionId)}>
+
+      <TouchableOpacity onPress={handleAddSet}>
         <Text style={{ color: '#4CAF50', fontWeight: 'bold' }}>+ Add Set</Text>
       </TouchableOpacity>
+
       <BluetoothRecordingScreen />
     </View>
   );

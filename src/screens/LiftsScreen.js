@@ -1,17 +1,37 @@
 // src/screens/LiftsScreen.js
-
-// src/screens/LiftsScreen.js
-
-import React, { useState } from 'react';
-import { View, Text, FlatList, TouchableOpacity, TextInput, Alert, StyleSheet } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, FlatList, TouchableOpacity, TextInput, StyleSheet } from 'react-native';
 import { useUserLifts } from '../hooks/useUserLifts';
 import { useUserSessions } from '../hooks/useUserSessions';
 
 export default function LiftsScreen() {
   const { lifts, addLift, deleteLift } = useUserLifts();
-  const { sessions } = useUserSessions();
+  const { sessions, fetchAllSetsAcrossSessions, fetchReps } = useUserSessions();
 
   const [newLiftName, setNewLiftName] = useState('');
+  const [allSets, setAllSets] = useState([]);
+
+  useEffect(() => {
+    if (sessions.length > 0) {
+      loadSets();
+    }
+  }, [sessions]);
+
+  const loadSets = async () => {
+    const sets = await fetchAllSetsAcrossSessions();
+    const setsWithReps = [];
+  
+    for (const set of sets) {
+      const reps = await fetchReps(set.sessionId, set.id); // wait for reps
+      setsWithReps.push({
+        ...set,
+        reps, // now you have all repdata here
+      });
+    }
+  
+    setAllSets(setsWithReps);
+  };
+  
 
   const handleAddLift = async () => {
     if (!newLiftName.trim()) return;
@@ -20,27 +40,14 @@ export default function LiftsScreen() {
   };
 
   const getAllSetsForLift = (liftType) => {
-    const sets = [];
-    sessions.forEach(session => {
-      (session.sets || []).forEach(set => {
-        if (set.liftType?.toLowerCase() === liftType.toLowerCase()) {
-          sets.push({
-            sessionName: session.name,
-            sessionDate: session.date,
-            setId: set.id,
-            exercise: set.exercise,
-            repdata: set.repdata,
-            totalRpe: set.totalRpe
-          });
-        }
-      });
-    });
-    return sets;
+    return allSets.filter(set => 
+      set.liftType?.toLowerCase() === liftType.toLowerCase()
+    );
   };
 
-    
   const renderLift = ({ item }) => {
     const sets = getAllSetsForLift(item.name);
+    
     return (
       <View style={styles.liftCard}>
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 }}>
@@ -57,9 +64,19 @@ export default function LiftsScreen() {
               <Text>Session: {set.sessionName}</Text>
               <Text>Exercise: {set.exercise}</Text>
               <Text>
-                Reps: {Object.keys(set.repdata).length} | RPE:{set.totalRpe ?? ''}
+                Reps: {set.repsCount} | RPE: {set.totalRpe ?? ''}
               </Text>
+                
               <Text>--------</Text>
+              {set.reps && set.reps.length > 0 ? (
+                set.reps.map((rep, idx) => (
+                    <View key={idx} style={{ paddingLeft: 10 }}>
+                    <Text>Rep {idx + 1}: RPE {rep.rpe}, ROM {rep.rom}, Tempo {rep.tempo}</Text>
+                    </View>
+                ))
+                ) : (
+                <Text style={{ paddingLeft: 10 }}>No reps</Text>
+                )}
             </View>
           ))
         )}
@@ -91,6 +108,7 @@ export default function LiftsScreen() {
     </View>
   );
 }
+
 
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 16 },
