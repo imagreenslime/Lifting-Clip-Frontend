@@ -18,12 +18,15 @@ export default function BluetoothRecordingScreen() {
   };
 
   BluetoothService.onSetUpdate((summaries) => {
+    console.log(summaries);
+    console.log("got summaries");
     const latestSetId = summaries[summaries.length - 1].set;
 
     const repsInSet = summaries.filter(
       (s) => s.set === latestSetId && !processedReps.has(s.id)
     );
-
+    console.log(repsInSet);
+    console.log("hello");
     if (repsInSet.length === 0) return;
 
     const convertedSet = {
@@ -38,9 +41,10 @@ export default function BluetoothRecordingScreen() {
         tempo: rep.tempo.join('-'),
       })),
     };
-
+    console.log("recieved new set");
+    console.log(convertedSet);
     addSet(selectedSessionId, convertedSet);
-
+    console.log("added new set");
     setProcessedReps((prev) => {
       const updated = new Set(prev);
       repsInSet.forEach((r) => updated.add(r.id));

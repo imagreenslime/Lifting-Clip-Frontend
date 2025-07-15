@@ -98,18 +98,54 @@ export function useUserSessions() {
     return sets;
   };
 
-  const addSet = async (sessionId) => {
+  const addSet = async (sessionId, setData = null) => {
     const uid = getUid();
-    const setData = {
-      exercise: 'Untitled Set',
-      liftType: '',
-      duration: '0s',
-      totalRpe: '',
-      createdAt: new Date().toISOString(),
-    };
     const setsRef = collection(db, 'users', uid, 'sessions', sessionId, 'sets');
-    const docRef = await addDoc(setsRef, setData);
-    return { id: docRef.id, ...setData };
+    console.log("got ref");
+    const dataToSave = setData
+    ? {
+        exercise: setData.exercise || 'Untitled Set',
+        reps: setData.reps || 0,
+        duration: setData.duration || '0s',
+        repData: setData.repData || [],
+        createdAt: new Date().toISOString(),
+      }
+    : {
+        exercise: 'Untitled Set',
+        liftType: '',
+        duration: '0s',
+        totalRpe: '',
+        repData: [],
+        createdAt: new Date().toISOString(),
+      };
+
+    console.log("sets");
+
+    // Add set to Firestore
+    const setDocRef = await addDoc(setsRef, dataToSave);
+
+    // Save reps if provided
+    if (setData?.repData && Array.isArray(setData.repData)) {
+      const repsRef = collection(setsRef, setDocRef.id, 'repdata');
+
+      const repPromises = setData.repData.map(async (rep) => {
+        console.log("REP:");
+        console.log(rep);
+        const repId = rep.id?.toString() || `rep-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+        const repToSave = {
+          id: repId,
+          duration: rep.duration || '0.00s',
+          rom: rep.rom || '0',
+          tempo: rep.tempo || [],
+          rpe: rep.rpe || '',
+        };
+        await setDoc(doc(repsRef, repId), repToSave);
+        
+      });
+      await Promise.all(repPromises);
+    }
+    return { id: setDocRef.id, ...dataToSave };
+
   };
 
   const updateSet = async (sessionId, setId, updates) => {

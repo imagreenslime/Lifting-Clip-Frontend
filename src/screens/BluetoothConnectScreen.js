@@ -63,7 +63,7 @@ export default function BluetoothConnectScreen() {
                 onConnect(device);
               }}
             >
-              {device.name || 'Unnamed Device'}\n{device.id}
+              {device.name || 'Unnamed Device'}
             </Button>
           ))
         )}

@@ -7,15 +7,8 @@ import { HomeScreen, SessionDetailScreen, SetDetailScreen, BluetoothConnectScree
 // TODO LIST
 
 // BACKEND/UX
-// rework bluetooth recording screen to work with firestore
-// add rep/adjust rep function
-// UI
-// make buttons bigger, wider, and rectangular shaped, 
-// animations
-// 3 dots on each session instead of 1 million buttons
-// instead of opening new page, create table that still shows home page in the background 
-// show amount of sets, reps, etc on session page
-// on profile show ammount of workouts, add charts of etc
+// rep data doesn't show 1st rep
+// update sets after recording
 
 // people put what RPE it felt like
 // average concentric time for RPE will be outputted for each lift

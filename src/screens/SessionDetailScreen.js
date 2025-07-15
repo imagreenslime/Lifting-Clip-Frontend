@@ -33,6 +33,7 @@ export default function SessionDetailScreen() {
   const handleAddSet = async () => {
     await addSet(selectedSessionId);
     await loadSets();
+    console.log("set added");
   };
 
   return (
