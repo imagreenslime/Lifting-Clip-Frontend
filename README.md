@@ -1,97 +1,71 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+This is the React Native app for my Lifting Clip project — a small ESP32 device I built that clips to a barbell and streams live data over Bluetooth. The app connects to the clip, tracks bar speed, and gives lifters instant feedback on their sets.
 
-# Getting Started
+I built it because I was tired of guessing whether I was moving the bar fast enough — now I can see it.
 
-> **Note**: Make sure you have completed the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
+What it looks like
+-Scan → connect to the lifting chip
+-Press record and start the lift
+-Rep counter with duration and velocity per set
+-Session history so you can track progress
 
-## Step 1: Start Metro
+screenshots here
 
-First, you will need to run **Metro**, the JavaScript build tool for React Native.
+🚀 How to run it
+You’ll need Node + React Native setup on your machine (Xcode for iOS, Android Studio for Android).
 
-To start the Metro dev server, run the following command from the root of your React Native project:
+git clone https://github.com/imagreenslime/Lifting-Clip-Frontend.git
+cd Lifting-Clip-Frontend
 
-```sh
-# Using npm
-npm start
+# set Node version
+nvm install
+nvm use
 
-# OR using Yarn
-yarn start
-```
+# install dependencies
+npm ci
 
-## Step 2: Build and run your app
+# iOS only
+cd ios && pod install && cd ..
 
-With Metro running, open a new terminal window/pane from the root of your React Native project, and use one of the following commands to build and run your Android or iOS app:
+# start the packager
+npm start -- --reset-cache
 
-### Android
+# run on simulator
+npm run ios   # iOS
+npm run android   # Android
 
-```sh
-# Using npm
-npm run android
 
-# OR using Yarn
-yarn android
-```
+To run on your iPhone: open ios/LiftingClip.xcworkspace in Xcode, select your device, and press go. You’ll need to sign the app with your Apple ID.
 
-### iOS
+📡 How it talks to the clip
+The ESP32 sends data over BLE:
+Rep event – when a lift completes, with stats
 
-For iOS, remember to install CocoaPods dependencies (this only needs to be run on first clone or after updating native deps).
 
-The first time you create a new project, run the Ruby bundler to install CocoaPods itself:
+Tech used:
+-React Native + React Navigation
+-BLE (react-native-ble-plx)
+-Firebase + Firestroage
 
-```sh
-bundle install
-```
+iOS: CocoaPods / Xcode 15
 
-Then, and every time you update your native dependencies, run:
 
-```sh
-bundle exec pod install
-```
+Project structure
+src/
+  auth/            // main firebase structure
+  components/      // UI building blocks
+  screens/         // Home, Live Session, History
+  services/        // Bluetooth + data storage
+  hooks/           // custom React hooks
+  navigation/      // main navigation
+  context/           // React context
 
-For more information, please visit [CocoaPods Getting Started guide](https://guides.cocoapods.org/using/getting-started.html).
+What’s done
+-Connects to BLE device and streams data
+-Gets JSON filled with set/rep information
+-Rep detection + per-set summary
+-Local session log
 
-```sh
-# Using npm
-npm run ios
-
-# OR using Yarn
-yarn ios
-```
-
-If everything is set up correctly, you should see your new app running in the Android Emulator, iOS Simulator, or your connected device.
-
-This is one way to run your app — you can also build it directly from Android Studio or Xcode.
-
-## Step 3: Modify your app
-
-Now that you have successfully run the app, let's make changes!
-
-Open `App.tsx` in your text editor of choice and make some changes. When you save, your app will automatically update and reflect these changes — this is powered by [Fast Refresh](https://reactnative.dev/docs/fast-refresh).
-
-When you want to forcefully reload, for example to reset the state of your app, you can perform a full reload:
-
-- **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Dev Menu**, accessed via <kbd>Ctrl</kbd> + <kbd>M</kbd> (Windows/Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (macOS).
-- **iOS**: Press <kbd>R</kbd> in iOS Simulator.
-
-## Congratulations! :tada:
-
-You've successfully run and modified your React Native App. :partying_face:
-
-### Now what?
-
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [docs](https://reactnative.dev/docs/getting-started).
-
-# Troubleshooting
-
-If you're having issues getting the above steps to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
-
-# Learn More
-
-To learn more about React Native, take a look at the following resources:
-
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+What’s next
+-Auto-calibration
+-Export training data as CSV
+-Smarter fatigue tracking
