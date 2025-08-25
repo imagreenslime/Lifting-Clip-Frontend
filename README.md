@@ -51,6 +51,7 @@ iOS: CocoaPods / Xcode 15
 
 Project structure
 src/
+
   auth/            // main firebase structure
   components/      // UI building blocks
   screens/         // Home, Live Session, History
