@@ -1,6 +1,6 @@
-This is the React Native app for my Lifting Clip project — a small ESP32 device I built that clips to a barbell and streams live data over Bluetooth. The app connects to the clip, tracks bar speed, and gives lifters instant feedback on their sets.
+This is the React Native app for my Lifting Clip project: a small ESP32 device I built that clips to a barbell and streams live data over Bluetooth. The app connects to the clip, tracks bar speed, and gives lifters instant feedback on their sets.
 
-I built it because I was tired of guessing whether I was moving the bar fast enough — now I can see it.
+I built it because I was tired of guessing whether I was moving the bar fast enough.
 
 What it looks like
 -Scan → connect to the lifting chip
